@@ -14,6 +14,11 @@ public class Consumer implements Runnable{
     private KafkaConsumer<String, String> consumer;
     private volatile boolean running = true;
     private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
+    private final List<MessageHandler> listeners;
+
+    public Consumer(List<MessageHandler> listeners){
+        this.listeners = listeners;
+    }
 
     public void configure(Properties props){
         LOG.info("Configuring Consumer...");
@@ -36,12 +41,16 @@ public class Consumer implements Runnable{
     public void run() {
         LOG.info("Starting Consumer...");
         while (running && !Thread.currentThread().isInterrupted()) {
-            Map<String, List<PartitionInfo>> topics = consumer.listTopics();
             ConsumerRecords<String, String> records = consumer.poll(0);
             for (ConsumerRecord<String, String> record : records) {
-                LOG.info(String.format("offset = %d, key = %s, value = %s\n", record.offset(), record.key(), record.value()));
+                for (MessageHandler handler : listeners){
+                    handler.processMessage(record);
+                }
+//                LOG.info(String.format("offset = %d, key = %s, value = %s\n", record.offset(), record.key(), record.value()));
 //                System.out.printf("offset = %d, key = %s, value = %s\n", record.offset(), record.key(), record.value());
             }
+            consumer.commitAsync();
+            consumer.commitSync();
         }
     }
 }

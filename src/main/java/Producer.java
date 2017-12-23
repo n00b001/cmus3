@@ -47,19 +47,20 @@ public class Producer implements Runnable{
                                         "meta(partition=%d, offset=%d) time=%d\n",
                                 record.key(), record.value(), metadata.partition(),
                                 metadata.offset(), elapsedTime);
+                        Thread.sleep(1000);
 
                     }
                 } catch (ExecutionException e) {
                     LOG.error("Caught error: ", e);
-                } finally {
-                    producer.flush();
-                    producer.close();
                 }
             }
         }
         catch (InterruptedException ex){
             LOG.error("Caught exception: ", ex);
             Thread.currentThread().interrupt();
+        }finally {
+            producer.flush();
+            producer.close();
         }
     }
 }

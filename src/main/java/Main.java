@@ -9,11 +9,12 @@ import java.util.Properties;
 
 public class Main {
 
-    private Consumer Consumer = new Consumer();
+    private Consumer consumer;
     private Producer producer = new Producer();
     private List<Thread> threads = new ArrayList<>();
     private volatile boolean running = true;
     private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
+    private List<MessageHandler> listeners;
 
     public static void main(String[] args) {
 
@@ -22,10 +23,16 @@ public class Main {
     }
 
     public void run(){
+        setupListeners();
         startConsumer();
 //        startProducer();
         startAllThreads();
         waitForThreadsToFinish();
+    }
+
+    private void setupListeners() {
+        listeners = new ArrayList<>();
+        listeners.add(new DepositHandler());
     }
 
     private void startAllThreads() {
@@ -41,7 +48,7 @@ public class Main {
     }
 
     private void configureProducer() {
-        //Consumer properties
+        //consumer properties
         Properties props = new Properties();
         props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
                 "35.197.252.186:9092");
@@ -76,7 +83,7 @@ public class Main {
             LOG.error("Caught error! ", ex);
         }
         LOG.info("Shutting down...");
-        Consumer.stop();
+        consumer.stop();
         producer.stop();
         for(Thread t : threads){
             t.interrupt();
@@ -86,16 +93,16 @@ public class Main {
     private void startConsumer() {
         configureConsumer();
 
-        threads.add(new Thread(Consumer));
+        threads.add(new Thread(consumer));
     }
 
     private void configureConsumer() {
-        //Consumer properties
+        //consumer properties
         Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                "35.197.252.186:2181");
-//                "35.197.252.186:9092");
-//        props.put("group.id", "test-group");
+//                "35.197.252.186:2181");
+                "35.197.252.186:9092");
+        props.put("group.id", "test-group");
 
         props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
 
@@ -108,8 +115,9 @@ public class Main {
 
         //subscribe to topic
         List<String> conf = Arrays.asList("my-topic");
-        Consumer.configure(props);
-        Consumer.subscribe(conf);
+        consumer = new Consumer(listeners);
+        consumer.configure(props);
+        consumer.subscribe(conf);
     }
 
 }
