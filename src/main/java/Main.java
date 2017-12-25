@@ -1,5 +1,8 @@
+import handlers.DepositHandler;
+import handlers.MessageHandler;
+import handlers.SwapHandler;
+import handlers.WithdrawHandler;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.log4j.Logger;
 
 import java.util.ArrayList;
@@ -7,14 +10,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
-public class Main {
+public class Main implements Thread.UncaughtExceptionHandler{
 
-    private Consumer consumer;
-    private Producer producer = new Producer();
+//    private Consumer consumer = new Consumer();
+//    private Producer producer = new Producer();
     private List<Thread> threads = new ArrayList<>();
     private volatile boolean running = true;
     private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
-    private List<MessageHandler> listeners;
+//    private List<handlers.MessageHandler> listeners;
 
     public static void main(String[] args) {
 
@@ -23,17 +26,26 @@ public class Main {
     }
 
     public void run(){
-        setupListeners();
-        startConsumer();
+//        setupListeners();
+        setupConsumers();
+        setupUnhandledExceptions();
 //        startProducer();
         startAllThreads();
         waitForThreadsToFinish();
     }
 
-    private void setupListeners() {
-        listeners = new ArrayList<>();
-        listeners.add(new DepositHandler());
+    private void setupUnhandledExceptions() {
+        for (Thread t : threads){
+            t.setUncaughtExceptionHandler(this);
+        }
     }
+
+//    private void setupListeners() {
+//        listeners = new ArrayList<>();
+//        listeners.add(new handlers.DepositHandler());
+//        listeners.add(new handlers.WithdrawHandler());
+//        listeners.add(new handlers.SwapHandler());
+//    }
 
     private void startAllThreads() {
         for (Thread t : threads){
@@ -41,31 +53,31 @@ public class Main {
         }
     }
 
-    private void startProducer() {
-        configureProducer();
+//    private void startProducer() {
+//        configureProducer();
+//
+//        threads.add(new Thread(producer));
+//    }
 
-        threads.add(new Thread(producer));
-    }
-
-    private void configureProducer() {
-        //consumer properties
-        Properties props = new Properties();
-        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                "35.197.252.186:9092");
-//        props.put("group.id", "test-group");
-
-        //string inputs and outputs
-        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
-                "org.apache.kafka.common.serialization.StringSerializer");
-        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG
-                , "org.apache.kafka.common.serialization.StringSerializer");
-
-        props.put(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, "100");
-        props.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, "100");
-
-        producer.configure(props);
-        producer.subscribe("my-topic");
-    }
+//    private void configureProducer() {
+//        //consumer properties
+//        Properties props = new Properties();
+//        props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
+//                "35.197.252.186:9092");
+////        props.put("group.id", "test-group");
+//
+//        //string inputs and outputs
+//        props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,
+//                "org.apache.kafka.common.serialization.StringSerializer");
+//        props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG
+//                , "org.apache.kafka.common.serialization.StringSerializer");
+//
+//        props.put(ProducerConfig.TRANSACTION_TIMEOUT_CONFIG, "100");
+//        props.put(ProducerConfig.REQUEST_TIMEOUT_MS_CONFIG, "100");
+//
+//        producer.configure(props);
+//        producer.subscribe("my-topic");
+//    }
 
     private void waitForThreadsToFinish() {
         try {
@@ -83,28 +95,41 @@ public class Main {
             LOG.error("Caught error! ", ex);
         }
         LOG.info("Shutting down...");
-        consumer.stop();
-        producer.stop();
         for(Thread t : threads){
             t.interrupt();
         }
     }
 
-    private void startConsumer() {
-        configureConsumer();
+    private void setupConsumers() {
+        List<MessageHandler> depositListers = new ArrayList<>();
+        depositListers.add(new DepositHandler());
 
-        threads.add(new Thread(consumer));
+        List<MessageHandler> withdrawListers = new ArrayList<>();
+        withdrawListers.add(new WithdrawHandler());
+
+        List<MessageHandler> swapListers = new ArrayList<>();
+        swapListers.add(new SwapHandler());
+
+
+        Consumer depositConsumer = configureConsumer(Arrays.asList("DEPOSIT"), depositListers);
+        Consumer withdrawConsumer = configureConsumer(Arrays.asList("WITHDRAW"), withdrawListers);
+        Consumer swapConsumer = configureConsumer(Arrays.asList("SWAP"), swapListers);
+
+        threads.add(new Thread(depositConsumer));
+        threads.add(new Thread(withdrawConsumer));
+        threads.add(new Thread(swapConsumer));
     }
 
-    private void configureConsumer() {
+    private Consumer configureConsumer(List<String> topics, List<MessageHandler> listeners) {
         //consumer properties
         Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
 //                "35.197.252.186:2181");
                 "35.197.252.186:9092");
-        props.put("group.id", "test-group");
+        // This is the ID of this consumer machine
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "1");
 
-        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
+        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
 
         //string inputs and outputs
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
@@ -114,10 +139,14 @@ public class Main {
                 "org.apache.kafka.common.serialization.StringDeserializer");
 
         //subscribe to topic
-        List<String> conf = Arrays.asList("my-topic");
-        consumer = new Consumer(listeners);
-        consumer.configure(props);
-        consumer.subscribe(conf);
+        Consumer consumer = new Consumer();
+        consumer.configure(props, listeners);
+        consumer.subscribe(topics);
+        return consumer;
     }
 
+    @Override
+    public void uncaughtException(Thread t, Throwable e) {
+        LOG.error(String.format("Caught from thread: %s: ", t.toString()), e);
+    }
 }

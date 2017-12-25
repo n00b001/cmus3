@@ -1,11 +1,10 @@
+import handlers.MessageHandler;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.PartitionInfo;
 import org.apache.log4j.Logger;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 public class Consumer implements Runnable{
@@ -14,14 +13,14 @@ public class Consumer implements Runnable{
     private KafkaConsumer<String, String> consumer;
     private volatile boolean running = true;
     private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
-    private final List<MessageHandler> listeners;
+    private List<MessageHandler> listeners;
 
-    public Consumer(List<MessageHandler> listeners){
-        this.listeners = listeners;
+    public Consumer(){
     }
 
-    public void configure(Properties props){
+    public void configure(Properties props, List<MessageHandler> listeners){
         LOG.info("Configuring Consumer...");
+        this.listeners = listeners;
         consumer = new KafkaConsumer<>(props);
     }
 
@@ -44,13 +43,17 @@ public class Consumer implements Runnable{
             ConsumerRecords<String, String> records = consumer.poll(0);
             for (ConsumerRecord<String, String> record : records) {
                 for (MessageHandler handler : listeners){
-                    handler.processMessage(record);
+                    boolean successfullyProcessed = handler.processMessage(record);
+                    if (!successfullyProcessed){
+                        LOG.error("Could not process: " + record.toString());
+                    }else{
+                        consumer.commitAsync();
+//                        consumer.commitSync();
+                    }
                 }
 //                LOG.info(String.format("offset = %d, key = %s, value = %s\n", record.offset(), record.key(), record.value()));
 //                System.out.printf("offset = %d, key = %s, value = %s\n", record.offset(), record.key(), record.value());
             }
-            consumer.commitAsync();
-            consumer.commitSync();
         }
     }
 }
