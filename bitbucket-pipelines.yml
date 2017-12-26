@@ -9,4 +9,5 @@ pipelines:
   default:
     - step:
         script:
-          - bash ./gradlew build
+          - bash ./gradlew assemble
+          - bash ./gradlew test
