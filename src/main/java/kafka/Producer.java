@@ -1,3 +1,5 @@
+package kafka;
+
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
@@ -8,7 +10,7 @@ import java.util.concurrent.ExecutionException;
 
 public class Producer implements Runnable{
 
-    //kafka Consumer object
+    //kafka kafka.Consumer object
     private KafkaProducer<String, String> producer;
     private volatile boolean running = true;
     private final Logger LOG = Logger.getLogger(getClass().getSimpleName());

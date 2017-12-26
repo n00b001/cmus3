@@ -1,7 +1,10 @@
+import db.DBWrapper;
+import db.DBWrapperImpl;
 import handlers.DepositHandler;
 import handlers.MessageHandler;
 import handlers.SwapHandler;
 import handlers.WithdrawHandler;
+import kafka.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.log4j.Logger;
 
@@ -10,13 +13,16 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
+import static util.Const.*;
+
 public class Main implements Thread.UncaughtExceptionHandler{
 
-//    private Consumer consumer = new Consumer();
-//    private Producer producer = new Producer();
+//    private kafka.Consumer consumer = new kafka.Consumer();
+//    private kafka.Producer producer = new kafka.Producer();
     private List<Thread> threads = new ArrayList<>();
     private volatile boolean running = true;
     private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
+    private DBWrapper dbWrapper;
 //    private List<handlers.MessageHandler> listeners;
 
     public static void main(String[] args) {
@@ -27,11 +33,16 @@ public class Main implements Thread.UncaughtExceptionHandler{
 
     public void run(){
 //        setupListeners();
+        setupDBWrapper();
         setupConsumers();
         setupUnhandledExceptions();
 //        startProducer();
         startAllThreads();
         waitForThreadsToFinish();
+    }
+
+    private void setupDBWrapper() {
+        dbWrapper = new DBWrapperImpl();
     }
 
     private void setupUnhandledExceptions() {
@@ -102,18 +113,18 @@ public class Main implements Thread.UncaughtExceptionHandler{
 
     private void setupConsumers() {
         List<MessageHandler> depositListers = new ArrayList<>();
-        depositListers.add(new DepositHandler());
+        depositListers.add(new DepositHandler(dbWrapper));
 
         List<MessageHandler> withdrawListers = new ArrayList<>();
-        withdrawListers.add(new WithdrawHandler());
+        withdrawListers.add(new WithdrawHandler(dbWrapper));
 
         List<MessageHandler> swapListers = new ArrayList<>();
-        swapListers.add(new SwapHandler());
+        swapListers.add(new SwapHandler(dbWrapper));
 
 
-        Consumer depositConsumer = configureConsumer(Arrays.asList("DEPOSIT"), depositListers);
-        Consumer withdrawConsumer = configureConsumer(Arrays.asList("WITHDRAW"), withdrawListers);
-        Consumer swapConsumer = configureConsumer(Arrays.asList("SWAP"), swapListers);
+        Consumer depositConsumer = configureConsumer(Arrays.asList(DEPOSIT_TOPIC_NAME), depositListers);
+        Consumer withdrawConsumer = configureConsumer(Arrays.asList(WITHDRAW_TOPIC_NAME), withdrawListers);
+        Consumer swapConsumer = configureConsumer(Arrays.asList(SWAP_TOPIC_NAME), swapListers);
 
         threads.add(new Thread(depositConsumer));
         threads.add(new Thread(withdrawConsumer));

@@ -1,3 +1,5 @@
+package kafka;
+
 import handlers.MessageHandler;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -9,7 +11,7 @@ import java.util.Properties;
 
 public class Consumer implements Runnable{
 
-    //kafka Consumer object
+    //kafka kafka.Consumer object
     private KafkaConsumer<String, String> consumer;
     private volatile boolean running = true;
     private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
@@ -19,7 +21,7 @@ public class Consumer implements Runnable{
     }
 
     public void configure(Properties props, List<MessageHandler> listeners){
-        LOG.info("Configuring Consumer...");
+        LOG.info("Configuring kafka.Consumer...");
         this.listeners = listeners;
         consumer = new KafkaConsumer<>(props);
     }
@@ -32,13 +34,13 @@ public class Consumer implements Runnable{
     }
 
     public void stop(){
-        LOG.info("Stopping Consumer...");
+        LOG.info("Stopping kafka.Consumer...");
         running = false;
     }
 
     @Override
     public void run() {
-        LOG.info("Starting Consumer...");
+        LOG.info("Starting kafka.Consumer...");
         while (running && !Thread.currentThread().isInterrupted()) {
             ConsumerRecords<String, String> records = consumer.poll(0);
             for (ConsumerRecord<String, String> record : records) {

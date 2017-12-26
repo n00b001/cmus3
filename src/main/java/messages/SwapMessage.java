@@ -25,11 +25,11 @@ public class SwapMessage {
         return amountOfCoin;
     }
 
-    public String getFromCurrencyName() {
+    public String getFromCoinName() {
         return fromCurrencyName;
     }
 
-    public String getToCurrencyName() {
+    public String getToCoinName() {
         return toCurrencyName;
     }
 
