@@ -1,5 +1,6 @@
 package handlers;
 
+import messages.DepositMessage;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.log4j.Logger;
 
@@ -9,7 +10,8 @@ public class DepositHandler implements MessageHandler {
     @Override
     public boolean processMessage(ConsumerRecord<String, String> message) {
         if (TOPIC_NAME.equals(message.topic())) {
-            LOG.info(message);
+            DepositMessage depositMessage = new DepositMessage(message.value());
+            LOG.info(depositMessage);
             return true;
         }
         return false;

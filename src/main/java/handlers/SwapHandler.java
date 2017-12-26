@@ -1,5 +1,6 @@
 package handlers;
 
+import messages.SwapMessage;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.log4j.Logger;
 
@@ -9,7 +10,8 @@ public class SwapHandler implements MessageHandler {
     @Override
     public boolean processMessage(ConsumerRecord<String, String> message) {
         if (TOPIC_NAME.equals(message.topic())){
-            LOG.info(message);
+            SwapMessage withdrawMessage = new SwapMessage(message.value());
+            LOG.info(withdrawMessage);
             return true;
         }
         return false;

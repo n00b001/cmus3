@@ -43,12 +43,17 @@ public class Consumer implements Runnable{
             ConsumerRecords<String, String> records = consumer.poll(0);
             for (ConsumerRecord<String, String> record : records) {
                 for (MessageHandler handler : listeners){
-                    boolean successfullyProcessed = handler.processMessage(record);
-                    if (!successfullyProcessed){
-                        LOG.error("Could not process: " + record.toString());
-                    }else{
-                        consumer.commitAsync();
+                    try {
+                        boolean successfullyProcessed = handler.processMessage(record);
+                        if (!successfullyProcessed) {
+                            LOG.error("Could not process: " + record.toString());
+                        } else {
+                            consumer.commitAsync();
 //                        consumer.commitSync();
+                        }
+                    }catch (Exception e){
+                        LOG.error("Caught exception: ", e);
+                        consumer.commitAsync();
                     }
                 }
 //                LOG.info(String.format("offset = %d, key = %s, value = %s\n", record.offset(), record.key(), record.value()));
