@@ -16,6 +16,9 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 import static util.Const.DEPOSIT_TOPIC_NAME;
+import static util.KafkaMessageGenerator.getDepositMessages;
+import static util.KafkaMessageGenerator.getSwapMessages;
+import static util.KafkaMessageGenerator.getWithdrawMessages;
 
 public class DepositHandlerTest {
     private MessageHandler messageHandler;
@@ -30,15 +33,22 @@ public class DepositHandlerTest {
 
     @Test
     public void processMessage() {
-        List<ConsumerRecord<String, String>> records = new ArrayList<>();
-        String value = "{'"+ SwapMessage.AMOUNT_OF_COIN_ATTRIB+"':'100', '"
-                +SwapMessage.FROM_CURRENCY_NAME_ATTRIB+"':'GBP', '"
-                +SwapMessage.TO_CURRENCY_NAME_ATTRIB+"':'BTC', '"+
-                SwapMessage.USERNAME_ATTRIB+"':'testUser'}";
-        records.add(new ConsumerRecord<>(DEPOSIT_TOPIC_NAME, 0, 0, null, value));
+        List<ConsumerRecord<String, String>> records = getDepositMessages(100);
 
         for (ConsumerRecord<String, String> cr : records) {
-            messageHandler.processMessage(cr);
+            assert messageHandler.processMessage(cr);
+        }
+
+        records = getWithdrawMessages(100);
+
+        for (ConsumerRecord<String, String> cr : records) {
+            assert !messageHandler.processMessage(cr);
+        }
+
+        records = getSwapMessages(100);
+
+        for (ConsumerRecord<String, String> cr : records) {
+            assert !messageHandler.processMessage(cr);
         }
     }
 }

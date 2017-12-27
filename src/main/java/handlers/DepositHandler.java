@@ -64,7 +64,7 @@ public class DepositHandler implements MessageHandler {
                 LOG.fatal("Did not transfer coins! " + message.toString());
                 return false;
             }
-            throw new NotImplementedException();
+            return true;
         }
         return false;
     }
