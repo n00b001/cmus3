@@ -1,5 +1,9 @@
+import bank.Bank;
+import bank.BankImpl;
 import db.DBWrapper;
 import db.DBWrapperImpl;
+import exchange.Exchange;
+import exchange.ExchangeImpl;
 import handlers.DepositHandler;
 import handlers.MessageHandler;
 import handlers.SwapHandler;
@@ -23,6 +27,8 @@ public class Main implements Thread.UncaughtExceptionHandler{
     private volatile boolean running = true;
     private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
     private DBWrapper dbWrapper;
+    private Bank bank;
+    private Exchange exchange;
 //    private List<handlers.MessageHandler> listeners;
 
     public static void main(String[] args) {
@@ -31,14 +37,24 @@ public class Main implements Thread.UncaughtExceptionHandler{
         Main.run();
     }
 
-    public void run(){
+    private void run(){
 //        setupListeners();
         setupDBWrapper();
+        setupBank();
+        setupExchange();
         setupConsumers();
         setupUnhandledExceptions();
 //        startProducer();
         startAllThreads();
         waitForThreadsToFinish();
+    }
+
+    private void setupExchange() {
+        exchange = new ExchangeImpl();
+    }
+
+    private void setupBank() {
+        bank = new BankImpl();
     }
 
     private void setupDBWrapper() {
@@ -113,13 +129,13 @@ public class Main implements Thread.UncaughtExceptionHandler{
 
     private void setupConsumers() {
         List<MessageHandler> depositListers = new ArrayList<>();
-        depositListers.add(new DepositHandler(dbWrapper));
+        depositListers.add(new DepositHandler(dbWrapper, bank, exchange));
 
         List<MessageHandler> withdrawListers = new ArrayList<>();
-        withdrawListers.add(new WithdrawHandler(dbWrapper));
+        withdrawListers.add(new WithdrawHandler(dbWrapper, bank, exchange));
 
         List<MessageHandler> swapListers = new ArrayList<>();
-        swapListers.add(new SwapHandler(dbWrapper));
+        swapListers.add(new SwapHandler(dbWrapper, bank, exchange));
 
 
         Consumer depositConsumer = configureConsumer(Arrays.asList(DEPOSIT_TOPIC_NAME), depositListers);

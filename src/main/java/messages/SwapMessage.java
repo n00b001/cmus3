@@ -8,10 +8,10 @@ public class SwapMessage {
     private final String fromCurrencyName;
     private final String toCurrencyName;
     private final String username;
-    private static final String AMOUNT_OF_COIN_ATTRIB = "AMOUNT";
-    private static final String FROM_CURRENCY_NAME_ATTRIB = "FROM_CURRENCY_NAME";
-    private static final String TO_CURRENCY_NAME_ATTRIB = "TO_CURRENCY_NAME";
-    private static final String USERNAME_ATTRIB = "USER_NAME";
+    public static final String AMOUNT_OF_COIN_ATTRIB = "AMOUNT";
+    public static final String FROM_CURRENCY_NAME_ATTRIB = "FROM_CURRENCY_NAME";
+    public static final String TO_CURRENCY_NAME_ATTRIB = "TO_CURRENCY_NAME";
+    public static final String USERNAME_ATTRIB = "USER_NAME";
 
     public SwapMessage(String value) {
         JsonObject jsonObject = new JsonParser().parse(value).getAsJsonObject();

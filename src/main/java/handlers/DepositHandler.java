@@ -1,11 +1,14 @@
 package handlers;
 
+import bank.Bank;
 import cryptoKeyPairs.CryptoKeyPair;
-import cryptoKeyPairs.CryptoKeyPairGetter;
+import cryptoKeyPairs.CryptoKeyPairGenerator;
 import db.DBWrapper;
+import exchange.Exchange;
 import messages.SwapMessage;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.log4j.Logger;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import static util.Const.DEPOSIT_TOPIC_NAME;
 
@@ -13,9 +16,13 @@ public class DepositHandler implements MessageHandler {
     private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
     private static final String TOPIC_NAME = DEPOSIT_TOPIC_NAME;
     private final DBWrapper dbWrapper;
+    private final Bank bank;
+    private final Exchange exchange;
 
-    public DepositHandler(DBWrapper dbWrapper) {
+    public DepositHandler(DBWrapper dbWrapper, Bank bank, Exchange exchange) {
         this.dbWrapper = dbWrapper;
+        this.bank = bank;
+        this.exchange = exchange;
     }
 
     @Override
@@ -27,9 +34,9 @@ public class DepositHandler implements MessageHandler {
                     swapMessage.getToCoinName());
             if (publicAddress == null){
                 try {
-                    CryptoKeyPair keyPair = createKeyPair(swapMessage.getToCoinName());
+                    CryptoKeyPair keyPair = CryptoKeyPairGenerator.parse(swapMessage.getToCoinName());
                     boolean success = dbWrapper.addNewWallet(swapMessage.getUsername(), swapMessage.getToCoinName(),
-                            keyPair.getPublicAddress(), keyPair.getPrivateAddress());
+                            keyPair.getPublicAddress(), keyPair.getPrivateKey());
                     if (!success) {
                         LOG.fatal("Did not add wallet successfully! " + message.toString());
                         return false;
@@ -40,42 +47,25 @@ public class DepositHandler implements MessageHandler {
                     return false;
                 }
             }
-            boolean success = transferFromBankToExchange();
+            boolean success = bank.transferFromBankToExchange(swapMessage.getFromCoinName(),
+                    swapMessage.getAmountOfCoin());
             if (!success){
                 LOG.fatal("Did not transfer balance from bank to exchange! " + message.toString());
                 return false;
             }
-            success = exchangeCoins(swapMessage.getFromCoinName(), swapMessage.getToCoinName());
+            success = exchange.exchangeCurrency(swapMessage.getFromCoinName(), swapMessage.getToCoinName(),
+                    swapMessage.getAmountOfCoin());
             if (!success){
                 LOG.fatal("Did not exchange coins! " + message.toString());
                 return false;
             }
-            success = transferToWallet(publicAddress);
+            success = exchange.withdraw(swapMessage.getToCoinName(), publicAddress);
             if (!success){
                 LOG.fatal("Did not transfer coins! " + message.toString());
                 return false;
             }
-
-
-
-            return true;
+            throw new NotImplementedException();
         }
         return false;
-    }
-
-    private boolean transferToWallet(String publicAddress) {
-        return false;
-    }
-
-    private boolean exchangeCoins(String fromCurrencyName, String toCurrencyName) {
-        return false;
-    }
-
-    private boolean transferFromBankToExchange() {
-        return false;
-    }
-
-    private CryptoKeyPair createKeyPair(String toCoinName) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
-        return CryptoKeyPairGetter.parse(toCoinName);
     }
 }

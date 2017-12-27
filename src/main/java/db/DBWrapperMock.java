@@ -1,35 +1,30 @@
 package db;
 
 import messages.SwapMessage;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-public class DBWrapperImpl implements DBWrapper {
-    public DBWrapperImpl() {
-
-    }
-
+public class DBWrapperMock implements DBWrapper {
     @Override
     public String getPublicAddress(String user, String coin) {
-        throw new NotImplementedException();
+        return null;
     }
 
     @Override
     public boolean addNewWallet(String user, String coin, String publicAddress, String privateAddress) {
-        throw new NotImplementedException();
+        return true;
     }
 
     @Override
     public boolean addPortfolioBalance(SwapMessage message, double exchangeRate) {
-        throw new NotImplementedException();
+        return true;
     }
 
     @Override
     public double getFunds(String user, String coin) {
-        throw new NotImplementedException();
+        return 0;
     }
 
     @Override
     public String getPrivateKey(String user, String coin) {
-        throw new NotImplementedException();
+        return null;
     }
 }

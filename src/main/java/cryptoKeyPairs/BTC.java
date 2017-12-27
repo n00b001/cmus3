@@ -1,13 +1,25 @@
 package cryptoKeyPairs;
 
+import org.bitcoinj.core.ECKey;
+import org.bitcoinj.params.MainNetParams;
+
 public class BTC implements CryptoKeyPair {
-    @Override
-    public String getPublicAddress() {
-        return null;
+    private final String privateKeyStr;
+    private final String publicAddress;
+
+    BTC() {
+        ECKey ecKey = new ECKey();
+        privateKeyStr = ecKey.getPrivateKeyAsWiF(MainNetParams.get());
+        publicAddress = ecKey.toAddress(MainNetParams.get()).toBase58();
     }
 
     @Override
-    public String getPrivateAddress() {
-        return null;
+    public String getPublicAddress() {
+        return publicAddress;
+    }
+
+    @Override
+    public String getPrivateKey() {
+        return privateKeyStr;
     }
 }
