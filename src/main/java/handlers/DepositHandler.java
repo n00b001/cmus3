@@ -53,15 +53,17 @@ public class DepositHandler implements MessageHandler {
                 LOG.fatal("Did not transfer balance from bank to exchange! " + message.toString());
                 return false;
             }
-            success = exchange.exchangeCurrency(swapMessage.getFromCoinName(), swapMessage.getToCoinName(),
+            long purchasedAmount = exchange.exchangeCurrency(swapMessage.getFromCoinName(), swapMessage.getToCoinName(),
                     swapMessage.getAmountOfCoin());
+
+            success = exchange.withdraw(swapMessage.getToCoinName(), publicAddress, purchasedAmount);
             if (!success){
-                LOG.fatal("Did not exchange coins! " + message.toString());
+                LOG.fatal("Did not withdraw coins! " + message.toString());
                 return false;
             }
-            success = exchange.withdraw(swapMessage.getToCoinName(), publicAddress);
+            success = dbWrapper.addPortfolioBalance(swapMessage, purchasedAmount);
             if (!success){
-                LOG.fatal("Did not transfer coins! " + message.toString());
+                LOG.fatal("Did not add portfolio balance! " + message.toString());
                 return false;
             }
             return true;

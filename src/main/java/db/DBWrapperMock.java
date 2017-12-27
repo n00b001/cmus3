@@ -14,7 +14,7 @@ public class DBWrapperMock implements DBWrapper {
     }
 
     @Override
-    public boolean addPortfolioBalance(SwapMessage message, double exchangeRate) {
+    public boolean addPortfolioBalance(SwapMessage message, long purchasedAmount) {
         return true;
     }
 

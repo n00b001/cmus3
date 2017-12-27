@@ -2,12 +2,12 @@ package exchange;
 
 public class ExchangeMock implements Exchange {
     @Override
-    public boolean exchangeCurrency(String from, String to, long amount) {
-        return true;
+    public long exchangeCurrency(String from, String to, long amount) {
+        return amount;
     }
 
     @Override
-    public boolean withdraw(String coinName, String address) {
+    public boolean withdraw(String coinName, String address, long amount) {
         return true;
     }
 }

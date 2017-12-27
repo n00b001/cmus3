@@ -19,7 +19,7 @@ public class DBWrapperImpl implements DBWrapper {
     }
 
     @Override
-    public boolean addPortfolioBalance(SwapMessage message, double exchangeRate) {
+    public boolean addPortfolioBalance(SwapMessage message, long purchasedAmount) {
         throw new NotImplementedException();
     }
 
