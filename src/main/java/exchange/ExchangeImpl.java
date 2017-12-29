@@ -12,4 +12,9 @@ public class ExchangeImpl implements Exchange {
     public boolean withdraw(String coinName, String address, long amount) {
         throw new NotImplementedException();
     }
+
+    @Override
+    public String getDepositAddress(String fromCoinName) {
+        throw new NotImplementedException();
+    }
 }

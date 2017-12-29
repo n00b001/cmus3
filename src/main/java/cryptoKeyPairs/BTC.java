@@ -9,8 +9,20 @@ public class BTC implements CryptoKeyPair {
 
     public BTC() {
         ECKey ecKey = new ECKey();
+//        privateKeyStr = ecKey.getPrivateKeyAsHex();
+//        StringBuilder builder = new StringBuilder();
+//        ecKey.formatKeyWithAddress(true, builder, MainNetParams.get());
         privateKeyStr = ecKey.getPrivateKeyAsWiF(MainNetParams.get());
+//        String privateKey3 = ecKey.getEncryptedPrivateKey().toString();
+//        String privateKey4 = ecKey.getPrivKey().toString();
+//        String privateKey5 = new String(ecKey.getPrivKeyBytes());
+//        String privateKey6 = ecKey.getPrivateKeyEncoded(MainNetParams.get()).toString();
+//         privateKeyStr = ecKey.getPrivateKeyEncoded(MainNetParams.get()).toBase58();
+//        String privateKey8 = ecKey.getPrivateKeyEncoded(MainNetParams.get()).getKey().toString();
+
+
         publicAddress = ecKey.toAddress(MainNetParams.get()).toBase58();
+//        System.out.println("");
     }
 
     @Override
