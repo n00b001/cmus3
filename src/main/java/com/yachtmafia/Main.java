@@ -2,6 +2,7 @@ package com.yachtmafia;
 
 import com.yachtmafia.bank.Bank;
 import com.yachtmafia.bank.BankImpl;
+import com.yachtmafia.config.Config;
 import com.yachtmafia.db.DBWrapper;
 import com.yachtmafia.db.DBWrapperImpl;
 import com.yachtmafia.exchange.Exchange;
@@ -37,7 +38,7 @@ public class Main implements Thread.UncaughtExceptionHandler{
     private File file = new File(".");
     private WalletAppKit walletAppKit = new WalletAppKit(MainNetParams.get(), file, "");
     private HandlerDAO handlerDAO;
-//    private List<com.yachtmafia.handlers.MessageHandler> listeners;
+    private Config config;
 
     public static void main(String[] args) {
 
@@ -46,7 +47,7 @@ public class Main implements Thread.UncaughtExceptionHandler{
     }
 
     private void run(){
-//        setupListeners();
+        setupConfig();
         setupDBWrapper();
         setupBank();
         setupExchange();
@@ -55,6 +56,10 @@ public class Main implements Thread.UncaughtExceptionHandler{
 //        startProducer();
         startAllThreads();
         waitForThreadsToFinish();
+    }
+
+    private void setupConfig() {
+        this.config = new Config();
     }
 
     private void setupExchange() {
@@ -66,7 +71,7 @@ public class Main implements Thread.UncaughtExceptionHandler{
     }
 
     private void setupDBWrapper() {
-        dbWrapper = new DBWrapperImpl();
+        dbWrapper = new DBWrapperImpl(config);
     }
 
     private void setupUnhandledExceptions() {
@@ -74,13 +79,6 @@ public class Main implements Thread.UncaughtExceptionHandler{
             t.setUncaughtExceptionHandler(this);
         }
     }
-
-//    private void setupListeners() {
-//        listeners = new ArrayList<>();
-//        listeners.add(new com.yachtmafia.handlers.DepositHandler());
-//        listeners.add(new com.yachtmafia.handlers.WithdrawHandler());
-//        listeners.add(new com.yachtmafia.handlers.SwapHandler());
-//    }
 
     private void startAllThreads() {
         walletAppKit.startAsync();
@@ -165,7 +163,6 @@ public class Main implements Thread.UncaughtExceptionHandler{
         //consumer properties
         Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
-//                "35.197.252.186:2181");
                 "35.197.252.186:9092");
         // This is the ID of this consumer machine
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "1");
@@ -175,7 +172,6 @@ public class Main implements Thread.UncaughtExceptionHandler{
         //string inputs and outputs
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG,
                 "org.apache.kafka.common.serialization.StringDeserializer");
-//        props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
                 "org.apache.kafka.common.serialization.StringDeserializer");
 
