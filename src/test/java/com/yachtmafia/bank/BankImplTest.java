@@ -1,6 +1,6 @@
 package com.yachtmafia.bank;
 
-import org.junit.Ignore;
+import com.yachtmafia.config.Config;
 import org.junit.Test;
 
 /**
@@ -10,18 +10,11 @@ public class BankImplTest {
     BankImpl bank;
 
     @Test
-    @Ignore
-    public void test1() throws Exception {
-        bank = new BankImpl();
-        bank.test();
-    }
-
-    @Test
     public void payUser() throws Exception {
-        bank = new BankImpl();
+        bank = new BankImpl(new Config());
         String currency = "GBP";
         long amount = 100;
-        String user = "PAMILA@gmail.com";
+        String user = "xfanth@gmail.com";
         bank.payUser(currency, amount, user);
     }
 }

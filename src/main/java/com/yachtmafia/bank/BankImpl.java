@@ -3,7 +3,8 @@ package com.yachtmafia.bank;
 import com.paypal.api.payments.*;
 import com.paypal.api.payments.Error;
 import com.paypal.base.rest.APIContext;
-import com.paypal.base.rest.PayPalRESTException;
+import com.yachtmafia.config.Config;
+import com.yachtmafia.exchange.Exchange;
 import org.apache.log4j.Logger;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
@@ -14,18 +15,25 @@ import java.util.Map;
 
 public class BankImpl implements Bank {
     private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
-    // Replace these values with your clientId and secret. You can use these to get started right now.
-    String clientId = "AbTewYvrX2Ts8bDNai80TeybnI8G9qKoPsUQoZN8Qs0fMvZZJsgCRBeRyIduGsuYLZ-sbgj47ZNeNFeV";
-    String clientSecret = "EBT3S1kHYZVH6Um_VlIfRRTEKTc86WzUniKvac770EL6J1T2ig77X2VrLWpfx4tBBBNwkQoCGXFhpjcK";
+    private final Config config;
+
+    public BankImpl(Config config) {
+        this.config = config;
+    }
 
     @Override
-    public boolean transferFromBankToExchange(String currency, long amount) {
+    public boolean transferFromBankToExchange(String currency, long amount, Exchange exchange) {
         throw new NotImplementedException();
     }
 
     @Override
     public boolean payUser(String currency, long amount, String user) {
-        Currency paypalAmount = new Currency(currency, String.valueOf(amount / getUnitsPerCoin(currency)));
+        long unitsPerCoin = getUnitsPerCoin(currency);
+        if (unitsPerCoin == 0) {
+            LOG.error("Unknown currency: " + currency);
+            return false;
+        }
+        Currency paypalAmount = new Currency(currency, String.valueOf(amount / unitsPerCoin));
 
         PayoutItem payoutItem = new PayoutItem();
         payoutItem.setAmount(paypalAmount);
@@ -45,21 +53,25 @@ public class BankImpl implements Bank {
         payout.setSenderBatchHeader(batchHeader);
 
         try {
-            APIContext context = new APIContext(clientId, clientSecret, "sandbox");
+            APIContext context = new APIContext(config.CLIENT_ID_PAYPAL, config.CLIENT_SECRET_PAYPAL,
+                    "sandbox");
             Map<String, String> params = new HashMap<>();
 //            params.put("email_subject", "You have a payout!");
 
             PayoutBatch payoutBatch = payout.create(context, params);
             PayoutBatchHeader batchHeaderResp = payoutBatch.getBatchHeader();
             String batchStatus = batchHeaderResp.getBatchStatus();
-
-            /**
-             * todo: forever PENDING
-             */
-            while ("PENDING".equals(batchStatus)) {
-                LOG.info("Waiting for transaction to complete... ");
-                Thread.sleep(1000);
+            if (!"PENDING".equals(batchStatus)) {
+                throw new Exception("Unexpected status: " + batchStatus);
             }
+
+//            /**
+//             * todo: forever PENDING
+//             */
+//            while ("PENDING".equals(batchStatus)) {
+//                LOG.info("Waiting for transaction to complete... ");
+//                Thread.sleep(10000);
+//            }
 
             List<PayoutItemDetails> payoutBatchItems = payoutBatch.getItems();
             if (payoutBatchItems != null) {
@@ -73,17 +85,14 @@ public class BankImpl implements Bank {
                         LOG.error(issue);
                     }
                 }
+                return false;
             }
-
-            LOG.info("");
-        } catch (PayPalRESTException e) {
+        } catch (Exception e) {
             // Handle errors
             LOG.error("Error: ", e);
-        } catch (InterruptedException e) {
-            LOG.error("Caught: ", e);
-            Thread.currentThread().interrupt();
+            return false;
         }
-        throw new NotImplementedException();
+        return true;
     }
 
     private long getUnitsPerCoin(String currency) {
@@ -103,39 +112,6 @@ public class BankImpl implements Bank {
             default:
                 LOG.fatal("UNKNOWN CURRENCY: " + currency);
                 return 0;
-        }
-    }
-
-    public void test() {
-        Amount amount = new Amount();
-        amount.setCurrency("USD");
-        amount.setTotal("1.00");
-
-        Transaction transaction = new Transaction();
-        transaction.setAmount(amount);
-        java.util.List<Transaction> transactions = new java.util.ArrayList<>();
-        transactions.add(transaction);
-
-        Payer payer = new Payer();
-        payer.setPaymentMethod("paypal");
-
-        Payment payment = new Payment();
-        payment.setIntent("sale");
-        payment.setPayer(payer);
-        payment.setTransactions(transactions);
-
-        RedirectUrls redirectUrls = new RedirectUrls();
-        redirectUrls.setCancelUrl("https://example.com/cancel");
-        redirectUrls.setReturnUrl("https://example.com/return");
-        payment.setRedirectUrls(redirectUrls);
-
-        try {
-            APIContext context = new APIContext(clientId, clientSecret, "sandbox");
-            Payment createdPayment = payment.create(context);
-            LOG.info(createdPayment.toString());
-        } catch (PayPalRESTException e) {
-            // Handle errors
-            LOG.error("Error: ", e);
         }
     }
 }

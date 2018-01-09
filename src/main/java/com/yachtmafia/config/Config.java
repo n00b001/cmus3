@@ -23,4 +23,10 @@ public class Config {
     public String PRIVATE_TABLE = "privatekeys";
     public String PORTFOLIO_TABLE = "portfoliobalances";
 
+    public String CLIENT_ID_PAYPAL = "AbTewYvrX2Ts8bDNai80TeybnI8G9qKoPsUQoZN8Qs0fMvZZJsgCRBeRyIduGsuYLZ-sbgj47ZNeNFeV";
+    public String CLIENT_SECRET_PAYPAL = "EBT3S1kHYZVH6Um_VlIfRRTEKTc86WzUniKvac770EL6J1T2ig77X2VrLWpfx4tBBBNwkQoCGXFhpjcK";
+
+    public String COINBASE_KEY = "k3d1JeBuZoqPXDNM";
+    public String COINBASE_SECRET = "yoSgwEVgXVRRnfeW8OZe8QybYZXDg9RJ";
+
 }

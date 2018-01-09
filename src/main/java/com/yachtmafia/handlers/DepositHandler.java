@@ -57,7 +57,7 @@ public class DepositHandler implements MessageHandler {
                 }
             }
             boolean success = handlerDAO.getBank().transferFromBankToExchange(swapMessage.getFromCoinName(),
-                    swapMessage.getAmountOfCoin());
+                    swapMessage.getAmountOfCoin(), handlerDAO.getExchange());
             if (!success){
                 LOG.fatal("Did not transfer balance from com.yachtmafia.bank to com.yachtmafia.exchange! "
                         + message.toString());

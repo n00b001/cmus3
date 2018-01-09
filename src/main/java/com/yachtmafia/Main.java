@@ -68,7 +68,7 @@ public class Main implements Thread.UncaughtExceptionHandler{
     }
 
     private void setupBank() {
-        bank = new BankImpl();
+        bank = new BankImpl(config);
     }
 
     private void setupDBWrapper() {

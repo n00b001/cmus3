@@ -1,8 +1,21 @@
 package com.yachtmafia.exchange;
 
+import com.coinbase.api.Coinbase;
+import com.coinbase.api.CoinbaseBuilder;
+import com.yachtmafia.config.Config;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class ExchangeImpl implements Exchange {
+    private Config config;
+    private Coinbase cb;
+
+    public ExchangeImpl(Config config) {
+        this.config = config;
+        cb = new CoinbaseBuilder()
+                .withApiKey(config.COINBASE_KEY, config.COINBASE_SECRET)
+                .build();
+    }
+
     @Override
     public long exchangeCurrency(String from, String to, long amount) {
         throw new NotImplementedException();
