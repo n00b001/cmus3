@@ -9,12 +9,17 @@ public class ExchangeMock implements Exchange {
     }
 
     @Override
-    public boolean withdraw(String coinName, String address, long amount) {
+    public boolean withdrawCrypto(String coinName, String address, long amount) {
         return true;
     }
 
     @Override
     public String getDepositAddress(String fromCoinName) {
         return new BTC().getPublicAddress();
+    }
+
+    @Override
+    public boolean withdrawToBank(String toCoinName, long purchasedAmount) {
+        return true;
     }
 }

@@ -10,4 +10,5 @@ public interface DBWrapper {
     boolean addPortfolioBalance(SwapMessage message, long purchasedAmount);
     double getFunds(String user, String coin);
     String getPrivateKey(String user, String coin);
+
 }

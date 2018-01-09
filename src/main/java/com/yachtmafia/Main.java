@@ -9,12 +9,10 @@ import com.yachtmafia.exchange.Exchange;
 import com.yachtmafia.exchange.ExchangeImpl;
 import com.yachtmafia.handlers.*;
 import com.yachtmafia.kafka.Consumer;
+import com.yachtmafia.walletWrapper.WalletWrapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.log4j.Logger;
-import org.bitcoinj.kits.WalletAppKit;
-import org.bitcoinj.params.MainNetParams;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -34,11 +32,9 @@ public class Main implements Thread.UncaughtExceptionHandler{
     private DBWrapper dbWrapper;
     private Bank bank;
     private Exchange exchange;
-
-    private File file = new File(".");
-    private WalletAppKit walletAppKit = new WalletAppKit(MainNetParams.get(), file, "");
     private HandlerDAO handlerDAO;
     private Config config;
+    private WalletWrapper walletWrapper;
 
     public static void main(String[] args) {
 
@@ -51,11 +47,16 @@ public class Main implements Thread.UncaughtExceptionHandler{
         setupDBWrapper();
         setupBank();
         setupExchange();
+        setupWalletWrapper();
         setupConsumers();
         setupUnhandledExceptions();
 //        startProducer();
         startAllThreads();
         waitForThreadsToFinish();
+    }
+
+    private void setupWalletWrapper() {
+        walletWrapper = new WalletWrapper();
     }
 
     private void setupConfig() {
@@ -81,7 +82,7 @@ public class Main implements Thread.UncaughtExceptionHandler{
     }
 
     private void startAllThreads() {
-        walletAppKit.startAsync();
+        walletWrapper.startAsync();
         for (Thread t : threads){
             t.start();
         }
@@ -135,7 +136,7 @@ public class Main implements Thread.UncaughtExceptionHandler{
     }
 
     private void setupConsumers() {
-        handlerDAO = new HandlerDAO(dbWrapper, bank, exchange, walletAppKit);
+        handlerDAO = new HandlerDAO(dbWrapper, bank, exchange, walletWrapper);
 
         List<MessageHandler> depositListers = new ArrayList<>();
         ExecutorService handlerPool = Executors.newFixedThreadPool(3);
@@ -155,8 +156,8 @@ public class Main implements Thread.UncaughtExceptionHandler{
         Consumer swapConsumer = configureConsumer(Arrays.asList(SWAP_TOPIC_NAME), swapListers);
 
         threads.add(new Thread(depositConsumer));
-//        threads.add(new Thread(withdrawConsumer));
-//        threads.add(new Thread(swapConsumer));
+        threads.add(new Thread(withdrawConsumer));
+        threads.add(new Thread(swapConsumer));
     }
 
     private Consumer configureConsumer(List<String> topics, List<MessageHandler> listeners) {

@@ -25,20 +25,28 @@ public class DBWrapperImpl implements DBWrapper {
         String query =
                 "SELECT " +
                         "    currencyId " +
-                        "FROM " +
-                        "    currencies " +
-                        "WHERE " +
+                        " FROM " +
+                        config.CURRENCIES_TABLE +
+                        " WHERE " +
                         "    symbol = '" + coin + "'";
         String currencyID = getSingleQueryString(query);
+        if (currencyID == null) {
+            LOG.error("Currency not found: " + coin);
+            return false;
+        }
 
         query =
                 "SELECT " +
                         "    userId " +
                         "FROM " +
-                        "    users " +
-                        "WHERE " +
+                        config.USERS_TABLE +
+                        " WHERE " +
                         "    email = '" + user + "'";
         String userId = getSingleQueryString(query);
+        if (userId == null) {
+            LOG.error("User not found: " + user);
+            return false;
+        }
 
 //        String amount = String.valueOf(message.getAmountOfCoin());
 
@@ -57,38 +65,40 @@ public class DBWrapperImpl implements DBWrapper {
 
         query =
                 "INSERT INTO " +
-                        "    wallets " +
-                        "    (currencyId, userId, publickey) " +
-                        "VALUES " +
+                        config.WALLETS_TABLE +
+                        "    (currencyId, userId, publicaddress) " +
+                        " VALUES " +
                         "    ('" + currencyID + "', '" + userId + "', '" + publicAddress + "') ";
+
+        String walletId;
+
         try(Connection con= DriverManager.getConnection(
                 config.connectionString,
                 config.username, config.password);
             Statement stmt = con.createStatement()
         ){
             int rs = stmt.executeUpdate(query);
-            LOG.info(rs);
+            walletId = String.valueOf(rs);
+//            LOG.info(rs);
 //            rs.close();
         } catch (SQLException e) {
             LOG.error("Caught: ", e);
             return false;
         }
 
-        String walletId = "";
-
         query =
                 "INSERT INTO " +
-                        "    privatekeys " +
+                        config.PRIVATE_TABLE +
                         "    (walletId, privKey) " +
-                        "VALUES " +
+                        " VALUES " +
                         "    ('" + walletId + "', '" + privateAddress + "') ";
         try (Connection con = DriverManager.getConnection(
                 config.connectionString,
                 config.username, config.password);
-             Statement stmt = con.createStatement();
-             ResultSet rs = stmt.executeQuery(query)
+             Statement stmt = con.createStatement()
         ) {
-            rs.close();
+            int rs = stmt.executeUpdate(query);
+            LOG.debug(rs);
         } catch (SQLException e) {
             LOG.error("Caught: ", e);
             return false;
@@ -102,41 +112,67 @@ public class DBWrapperImpl implements DBWrapper {
         String query =
                 "SELECT " +
                         "    currencyId " +
-                        "FROM " +
-                        "    currencies " +
-                        "WHERE " +
+                        " FROM " +
+                        config.CURRENCIES_TABLE +
+                        " WHERE " +
                         "    symbol = '" + message.getFromCoinName() + "'";
-        String currencyID = getSingleQueryString(query);
+        String currencyIDfrom = getSingleQueryString(query);
 
         query =
                 "SELECT " +
                         "    userId " +
-                        "FROM " +
-                        "    users " +
-                        "WHERE " +
+                        " FROM " +
+                        config.USERS_TABLE +
+                        " WHERE " +
                         "    email = '" + message.getUsername() + "'";
         String userId = getSingleQueryString(query);
 
-        String amount = String.valueOf(message.getAmountOfCoin());
+        String amount = String.valueOf(-message.getAmountOfCoin());
 
         query =
                 "SELECT " +
                         "    SUM(amount) " +
-                        "FROM " +
-                        "    portfoliobalances " +
-                        "WHERE " +
-                        "    userId = '" + userId + "' AND currencyId = '" + currencyID + "'";
+                        " FROM " +
+                        config.PORTFOLIO_TABLE +
+                        " WHERE " +
+                        "    userId = '" + userId + "' AND currencyId = '" + currencyIDfrom + "'";
         String runningTotal = getSingleQueryString(query);
 
 //        String leftSide = getSingleQueryString(query);
 //        String rightSide = getSingleQueryString(query);
 
         query =
-                "INSERT INTO" +
-                        "    portfoliobalances" +
+                "INSERT INTO " +
+                        config.PORTFOLIO_TABLE +
                         "    (currencyId, userId, amount, runningTotal)" +
-                        "VALUES" +
-                        "    ('" + currencyID + "', '" + userId + "', '" + amount + "', '" + runningTotal + "')";
+                        " VALUES" +
+                        "    ('" + currencyIDfrom + "', '" + userId + "', '" + amount + "', '" + runningTotal + "')";
+        try (Connection con = DriverManager.getConnection(
+                config.connectionString,
+                config.username, config.password);
+             Statement stmt = con.createStatement();
+             ResultSet rs = stmt.executeQuery(query)
+        ) {
+            rs.close();
+        } catch (SQLException e) {
+            LOG.error("Caught: ", e);
+            success = false;
+        }
+        query =
+                "SELECT " +
+                        "    currencyId " +
+                        " FROM " +
+                        config.CURRENCIES_TABLE +
+                        " WHERE " +
+                        "    symbol = '" + message.getToCoinName() + "'";
+        String currencyIDto = getSingleQueryString(query);
+
+        query =
+                "INSERT INTO " +
+                        config.PORTFOLIO_TABLE +
+                        "    (currencyId, userId, amount, runningTotal) " +
+                        " VALUES" +
+                        "    ('" + currencyIDto + "', '" + userId + "', '" + purchasedAmount + "', '" + runningTotal + "')";
         try (Connection con = DriverManager.getConnection(
                 config.connectionString,
                 config.username, config.password);
@@ -151,15 +187,17 @@ public class DBWrapperImpl implements DBWrapper {
         return success;
     }
 
+
     @Override
     public double getFunds(String user, String coin) {
         String query =
                 "SELECT " +
                         "   runningTotal " +
-                        "FROM " +
-                        "    portfoliobalances P INNER JOIN users U ON P.userID = U.userID " +
-                        "    INNER JOIN currencies C ON C.currencyID = P.currencyID " +
-                        "WHERE " +
+                        " FROM " +
+                        "    " + config.PORTFOLIO_TABLE + " P INNER JOIN " + config.USERS_TABLE
+                        + " U ON P.userID = U.userID " +
+                        "    INNER JOIN " + config.CURRENCIES_TABLE + " C ON C.currencyID = P.currencyID " +
+                        " WHERE " +
                         "    U.email = '" + user + "' AND C.symbol = '" + coin + "'";
         String funds = getSingleQueryString(query);
         if (funds != null) {
@@ -174,11 +212,11 @@ public class DBWrapperImpl implements DBWrapper {
         String query =
                 "SELECT " +
                         "   privKey " +
-                        "FROM " +
-                        "    privatekeys P " +
+                        " FROM " +
+                        "    " + config.PRIVATE_TABLE + " P " +
                         "    INNER JOIN wallets W ON P.walletId = W.walletId " +
                         "    INNER JOIN users U ON W.userID = U.userID " +
-                        "WHERE " +
+                        " WHERE " +
                         "    U.email = '" + user + "' AND C.symbol = '" + coin + "'";
         return getSingleQueryString(query);
     }
@@ -187,11 +225,11 @@ public class DBWrapperImpl implements DBWrapper {
     public String getPublicAddress(String user, String coin) {
         String query =
                 "SELECT " +
-                        "   publickey " +
-                        "FROM " +
-                        "    wallets W INNER JOIN users U ON W.userID = U.userID " +
-                        "    INNER JOIN currencies C ON C.currencyID = W.currencyID " +
-                        "WHERE " +
+                        "   publicaddress " +
+                        " FROM " +
+                        "    " + config.WALLETS_TABLE + " W INNER JOIN " + config.USERS_TABLE + " U ON W.userID = U.userID " +
+                        "    INNER JOIN " + config.CURRENCIES_TABLE + " C ON C.currencyID = W.currencyID " +
+                        " WHERE " +
                         "    U.email = '" + user + "' AND C.symbol = '" + coin + "'";
         return getSingleQueryString(query);
     }

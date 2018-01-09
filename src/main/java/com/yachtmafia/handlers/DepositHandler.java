@@ -43,7 +43,8 @@ public class DepositHandler implements MessageHandler {
             if (publicAddress == null){
                 try {
                     CryptoKeyPair keyPair = CryptoKeyPairGenerator.parse(swapMessage.getToCoinName());
-                    boolean success = handlerDAO.getDbWrapper().addNewWallet(swapMessage.getUsername(), swapMessage.getToCoinName(),
+                    boolean success = handlerDAO.getDbWrapper().addNewWallet(swapMessage.getUsername(),
+                            swapMessage.getToCoinName(),
                             keyPair.getPublicAddress(), keyPair.getPrivateKey());
                     if (!success) {
                         LOG.fatal("Did not add wallet successfully! " + message.toString());
@@ -58,13 +59,15 @@ public class DepositHandler implements MessageHandler {
             boolean success = handlerDAO.getBank().transferFromBankToExchange(swapMessage.getFromCoinName(),
                     swapMessage.getAmountOfCoin());
             if (!success){
-                LOG.fatal("Did not transfer balance from com.yachtmafia.bank to com.yachtmafia.exchange! " + message.toString());
+                LOG.fatal("Did not transfer balance from com.yachtmafia.bank to com.yachtmafia.exchange! "
+                        + message.toString());
                 return false;
             }
-            long purchasedAmount = handlerDAO.getExchange().exchangeCurrency(swapMessage.getFromCoinName(), swapMessage.getToCoinName(),
-                    swapMessage.getAmountOfCoin());
+            long purchasedAmount = handlerDAO.getExchange().exchangeCurrency(swapMessage.getFromCoinName(),
+                    swapMessage.getToCoinName(), swapMessage.getAmountOfCoin());
 
-            success = handlerDAO.getExchange().withdraw(swapMessage.getToCoinName(), publicAddress, purchasedAmount);
+            success = handlerDAO.getExchange().withdrawCrypto(swapMessage.getToCoinName(), publicAddress,
+                    purchasedAmount);
             if (!success){
                 LOG.fatal("Did not withdraw coins! " + message.toString());
                 return false;

@@ -3,7 +3,7 @@ package com.yachtmafia.handlers;
 import com.yachtmafia.bank.Bank;
 import com.yachtmafia.db.DBWrapper;
 import com.yachtmafia.exchange.Exchange;
-import org.bitcoinj.kits.WalletAppKit;
+import com.yachtmafia.walletWrapper.WalletWrapper;
 
 /**
  * Created by xfant on 2017-12-31.
@@ -12,13 +12,13 @@ public class HandlerDAO {
     private final DBWrapper dbWrapper;
     private final Bank bank;
     private final Exchange exchange;
-    private final WalletAppKit walletAppKit;
+    private final WalletWrapper walletWrapper;
 
-    public HandlerDAO(DBWrapper dbWrapper, Bank bank, Exchange exchange, WalletAppKit walletAppKit) {
+    public HandlerDAO(DBWrapper dbWrapper, Bank bank, Exchange exchange, WalletWrapper walletWrapper) {
         this.dbWrapper = dbWrapper;
         this.bank = bank;
         this.exchange = exchange;
-        this.walletAppKit = walletAppKit;
+        this.walletWrapper = walletWrapper;
     }
 
     DBWrapper getDbWrapper() {
@@ -33,7 +33,7 @@ public class HandlerDAO {
         return exchange;
     }
 
-    WalletAppKit getWalletAppKit() {
-        return walletAppKit;
+    public WalletWrapper getWalletWrapper() {
+        return walletWrapper;
     }
 }
