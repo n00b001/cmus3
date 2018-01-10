@@ -3,7 +3,7 @@ package com.yachtmafia.handlers;
 import com.yachtmafia.bank.BankMock;
 import com.yachtmafia.db.DBWrapperMock;
 import com.yachtmafia.exchange.ExchangeMock;
-import com.yachtmafia.walletWrapper.WalletWrapperMock;
+import com.yachtmafia.walletwrapper.WalletWrapperMock;
 
 /**
  * Created by xfant on 2017-12-31.

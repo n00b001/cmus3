@@ -3,7 +3,7 @@ package com.yachtmafia.handlers;
 import com.yachtmafia.bank.Bank;
 import com.yachtmafia.db.DBWrapper;
 import com.yachtmafia.exchange.Exchange;
-import com.yachtmafia.walletWrapper.WalletWrapper;
+import com.yachtmafia.walletwrapper.WalletWrapper;
 
 /**
  * Created by xfant on 2017-12-31.
@@ -33,7 +33,7 @@ public class HandlerDAO {
         return exchange;
     }
 
-    public WalletWrapper getWalletWrapper() {
+    WalletWrapper getWalletWrapper() {
         return walletWrapper;
     }
 }

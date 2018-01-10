@@ -9,7 +9,7 @@ import com.yachtmafia.exchange.Exchange;
 import com.yachtmafia.exchange.ExchangeImpl;
 import com.yachtmafia.handlers.*;
 import com.yachtmafia.kafka.Consumer;
-import com.yachtmafia.walletWrapper.WalletWrapper;
+import com.yachtmafia.walletwrapper.WalletWrapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.log4j.Logger;
 
@@ -64,7 +64,7 @@ public class Main implements Thread.UncaughtExceptionHandler{
     }
 
     private void setupExchange() {
-        exchange = new ExchangeImpl();
+        exchange = new ExchangeImpl(config);
     }
 
     private void setupBank() {
@@ -128,6 +128,7 @@ public class Main implements Thread.UncaughtExceptionHandler{
         }
         catch (InterruptedException ex){
             LOG.error("Caught error! ", ex);
+            Thread.currentThread().interrupt();
         }
         LOG.info("Shutting down...");
         for(Thread t : threads){
@@ -163,8 +164,7 @@ public class Main implements Thread.UncaughtExceptionHandler{
     private Consumer configureConsumer(List<String> topics, List<MessageHandler> listeners) {
         //consumer properties
         Properties props = new Properties();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
-                "35.197.252.186:9092");
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, config.KAFKA_ADDRESS);
         // This is the ID of this consumer machine
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "1");
 

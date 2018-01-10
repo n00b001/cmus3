@@ -1,4 +1,4 @@
-package com.yachtmafia.walletWrapper;
+package com.yachtmafia.walletwrapper;
 
 import com.google.common.util.concurrent.ListenableFuture;
 import org.apache.log4j.Logger;
@@ -23,22 +23,20 @@ public class WalletWrapper {
     private File file = new File(".");
     private WalletAppKit walletAppKit = new WalletAppKit(MainNetParams.get(), file, "");
 
-    public WalletWrapper() {
-
-    }
-
     public void startAsync() {
         walletAppKit.startAsync();
     }
 
     public boolean sendTransaction(String privateKey, String publicAddress, String depositAddress, long amountOfCoin) {
         try {
+            /**
+             * todo: test
+             */
             ECKey ecKey = ECKey.fromPrivate(privateKey.getBytes());
             List<ECKey> ecKeyList = new ArrayList<>();
             ecKeyList.add(ecKey);
             Wallet wallet = Wallet.fromKeys(MainNetParams.get(), ecKeyList);
 
-//            String depositAddress = exchange.getDepositAddress(swapMessage.getFromCoinName());
             Address address = Address.fromBase58(MainNetParams.get(), depositAddress);
 
             final Coin value = Coin.valueOf(amountOfCoin);
@@ -48,7 +46,6 @@ public class WalletWrapper {
             wallet.completeTx(request);
 // Ensure these funds won't be spent again.
             wallet.commitTx(request.tx);
-//                wallet.saveToFile(...);
 // A proposed transaction is now sitting in request.tx - send it in the background.
             ListenableFuture<Transaction> future = walletAppKit.peerGroup()
                     .broadcastTransaction(request.tx).future();
