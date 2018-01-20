@@ -109,16 +109,9 @@ public class DBWrapperImpl implements DBWrapper {
     @Override
     public boolean addPortfolioBalance(SwapMessage message, long purchasedAmount) {
         boolean success = true;
-        String query =
-                "SELECT " +
-                        "    currencyId " +
-                        " FROM " +
-                        config.CURRENCIES_TABLE +
-                        " WHERE " +
-                        "    symbol = '" + message.getFromCoinName() + "'";
-        String currencyIDfrom = getSingleQueryString(query);
+        String currencyIDfrom = getCurrencyId(message.getFromCoinName());
 
-        query =
+        String query =
                 "SELECT " +
                         "    userId " +
                         " FROM " +
@@ -126,17 +119,24 @@ public class DBWrapperImpl implements DBWrapper {
                         " WHERE " +
                         "    email = '" + message.getUsername() + "'";
         String userId = getSingleQueryString(query);
+        if (userId == null){
+            throw new RuntimeException("userId not found: " + message.getUsername());
+        }
 
         String amount = String.valueOf(-message.getAmountOfCoin());
 
         query =
                 "SELECT " +
-                        "    SUM(amount) " +
+                        "    SUM(transactionDelta) " +
                         " FROM " +
                         config.PORTFOLIO_TABLE +
                         " WHERE " +
                         "    userId = '" + userId + "' AND currencyId = '" + currencyIDfrom + "'";
         String runningTotal = getSingleQueryString(query);
+        if (runningTotal == null){
+            LOG.warn("User has no existing balance: " + message.toString());
+            runningTotal = "0";
+        }
 
 //        String leftSide = getSingleQueryString(query);
 //        String rightSide = getSingleQueryString(query);
@@ -144,47 +144,54 @@ public class DBWrapperImpl implements DBWrapper {
         query =
                 "INSERT INTO " +
                         config.PORTFOLIO_TABLE +
-                        "    (currencyId, userId, amount, runningTotal)" +
+                        "    (currencyId, userId, transactionDelta, runningTotal)" +
                         " VALUES" +
                         "    ('" + currencyIDfrom + "', '" + userId + "', '" + amount + "', '" + runningTotal + "')";
         try (Connection con = DriverManager.getConnection(
                 config.connectionString,
                 config.username, config.password);
-             Statement stmt = con.createStatement();
-             ResultSet rs = stmt.executeQuery(query)
+             Statement stmt = con.createStatement()
         ) {
-            rs.close();
+            int rs = stmt.executeUpdate(query);
         } catch (SQLException e) {
             LOG.error("Caught: ", e);
             success = false;
         }
-        query =
-                "SELECT " +
-                        "    currencyId " +
-                        " FROM " +
-                        config.CURRENCIES_TABLE +
-                        " WHERE " +
-                        "    symbol = '" + message.getToCoinName() + "'";
-        String currencyIDto = getSingleQueryString(query);
+
+        String currencyIDto = getCurrencyId(message.getFromCoinName());
 
         query =
                 "INSERT INTO " +
                         config.PORTFOLIO_TABLE +
-                        "    (currencyId, userId, amount, runningTotal) " +
+                        "    (currencyId, userId, transactionDelta, runningTotal) " +
                         " VALUES" +
                         "    ('" + currencyIDto + "', '" + userId + "', '" + purchasedAmount + "', '" + runningTotal + "')";
         try (Connection con = DriverManager.getConnection(
                 config.connectionString,
                 config.username, config.password);
-             Statement stmt = con.createStatement();
-             ResultSet rs = stmt.executeQuery(query)
+             Statement stmt = con.createStatement()
         ) {
-            rs.close();
+            int rs = stmt.executeUpdate(query);
         } catch (SQLException e) {
             LOG.error("Caught: ", e);
             success = false;
         }
         return success;
+    }
+
+    private String getCurrencyId(String coinName) {
+        String query =
+                "SELECT " +
+                        "    currencyId " +
+                        " FROM " +
+                        config.CURRENCIES_TABLE +
+                        " WHERE " +
+                        "    symbol = '" + coinName + "'";
+        String currencyID = getSingleQueryString(query);
+        if (currencyID == null){
+            throw new RuntimeException("Currency not found: " + coinName);
+        }
+        return currencyID;
     }
 
 
@@ -213,9 +220,10 @@ public class DBWrapperImpl implements DBWrapper {
                 "SELECT " +
                         "   privKey " +
                         " FROM " +
-                        "    " + config.PRIVATE_TABLE + " P " +
-                        "    INNER JOIN wallets W ON P.walletId = W.walletId " +
-                        "    INNER JOIN users U ON W.userID = U.userID " +
+                        "    " + config.PRIVATE_TABLE + " P" +
+                        "    INNER JOIN " + config.WALLETS_TABLE+" W ON P.walletId = W.walletId " +
+                        "    INNER JOIN " + config.USERS_TABLE + " U ON W.userID = U.userID " +
+                        "    INNER JOIN " + config.CURRENCIES_TABLE + " C ON C.symbol = '" + coin + "'" +
                         " WHERE " +
                         "    U.email = '" + user + "' AND C.symbol = '" + coin + "'";
         return getSingleQueryString(query);

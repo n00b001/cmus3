@@ -6,7 +6,7 @@ import com.yachtmafia.config.Config;
 import com.yachtmafia.db.DBWrapper;
 import com.yachtmafia.db.DBWrapperImpl;
 import com.yachtmafia.exchange.Exchange;
-import com.yachtmafia.exchange.ExchangeImpl;
+import com.yachtmafia.exchange.ExchangeWrapper;
 import com.yachtmafia.handlers.*;
 import com.yachtmafia.kafka.Consumer;
 import com.yachtmafia.walletwrapper.WalletWrapper;
@@ -64,7 +64,7 @@ public class Main implements Thread.UncaughtExceptionHandler{
     }
 
     private void setupExchange() {
-        exchange = new ExchangeImpl(config);
+        exchange = new ExchangeWrapper(config);
     }
 
     private void setupBank() {
@@ -177,8 +177,7 @@ public class Main implements Thread.UncaughtExceptionHandler{
                 "org.apache.kafka.common.serialization.StringDeserializer");
 
         //subscribe to topic
-        Consumer consumer = new Consumer();
-        consumer.configure(props, listeners);
+        Consumer consumer = new Consumer(props, listeners);
         consumer.subscribe(topics);
         return consumer;
     }
