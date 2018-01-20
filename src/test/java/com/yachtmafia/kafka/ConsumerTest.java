@@ -16,7 +16,6 @@ public class ConsumerTest {
     @Test
     @Ignore
     public void run() throws Exception {
-        consumer = new Consumer();
         Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
                 "35.197.252.186:9092");
@@ -32,7 +31,7 @@ public class ConsumerTest {
                 "org.apache.kafka.common.serialization.StringDeserializer");
 
 
-        consumer.configure(props, null);
+        consumer = new Consumer(props, null);
         consumer.subscribe(Arrays.asList("my-topic"));
         consumer.run();
     }

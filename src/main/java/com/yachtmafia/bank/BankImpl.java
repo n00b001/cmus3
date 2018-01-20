@@ -9,9 +9,7 @@ import org.apache.log4j.Logger;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class BankImpl implements Bank {
     private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
@@ -55,44 +53,59 @@ public class BankImpl implements Bank {
         try {
             APIContext context = new APIContext(config.CLIENT_ID_PAYPAL, config.CLIENT_SECRET_PAYPAL,
                     "sandbox");
-            Map<String, String> params = new HashMap<>();
-//            params.put("email_subject", "You have a payout!");
 
-            PayoutBatch payoutBatch = payout.create(context, params);
+            PayoutBatch payoutBatch = payout.create(context, null);
             PayoutBatchHeader batchHeaderResp = payoutBatch.getBatchHeader();
             String batchStatus = batchHeaderResp.getBatchStatus();
             if (!"PENDING".equals(batchStatus)) {
                 throw new Exception("Unexpected status: " + batchStatus);
             }
 
-//            /**
-//             * todo: forever PENDING
-//             */
-//            while ("PENDING".equals(batchStatus)) {
-//                LOG.info("Waiting for transaction to complete... ");
-//                Thread.sleep(10000);
-//            }
+            String payoutBatchId = batchHeaderResp.getPayoutBatchId();
+            PayoutBatch response = Payout.get(context, payoutBatchId);
+            while("PENDING".equals(response.getBatchHeader().getBatchStatus())){
+                Thread.sleep(2000);
+                LOG.info("Waiting for pending payment...");
+                response = Payout.get(context, payoutBatchId);
+            }
 
-            List<PayoutItemDetails> payoutBatchItems = payoutBatch.getItems();
-            if (payoutBatchItems != null) {
-                for (PayoutItemDetails item : payoutBatchItems) {
-                    String transactionStatus = item.getTransactionStatus();
-                    LOG.info(transactionStatus);
-                    Error errors = item.getErrors();
+            while("PROCESSING".equals(response.getBatchHeader().getBatchStatus())){
+                Thread.sleep(20000);
+                LOG.info("Waiting for payment to process...");
+                response = Payout.get(context, payoutBatchId);
+            }
+
+
+            printErrors(response);
+
+            if (!"SUCCESS".equals(response.getBatchHeader().getBatchStatus())){
+                LOG.error(String.format("Did not successfully submit payment! currency: %s, amount: %s, user: %s",
+                        currency, amount, user));
+                return false;
+            }
+            return true;
+        } catch (Exception e) {
+            // Handle errors
+            LOG.error("Error: ", e);
+            return false;
+        }
+    }
+
+    private void printErrors(PayoutBatch response) {
+        List<PayoutItemDetails> payoutBatchItems = response.getItems();
+        if (payoutBatchItems != null) {
+            for (PayoutItemDetails item : payoutBatchItems) {
+                Error errors = item.getErrors();
+                if (errors != null) {
+                    LOG.error("Caught errors: ");
                     List<ErrorDetails> details = errors.getDetails();
                     for (ErrorDetails det : details) {
                         String issue = det.getIssue();
                         LOG.error(issue);
                     }
                 }
-                return false;
             }
-        } catch (Exception e) {
-            // Handle errors
-            LOG.error("Error: ", e);
-            return false;
         }
-        return true;
     }
 
     private long getUnitsPerCoin(String currency) {

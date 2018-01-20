@@ -21,13 +21,7 @@ public class Consumer implements Runnable{
     private volatile boolean running = true;
     private List<MessageHandler> listeners;
 
-    public Consumer(){
-        /**
-         * todo: move configure to here
-         */
-    }
-
-    public void configure(Properties props, List<MessageHandler> listeners){
+    public Consumer(Properties props, List<MessageHandler> listeners){
         LOG.info("Configuring Consumer...");
         this.listeners = listeners;
         consumer = new KafkaConsumer<>(props);
