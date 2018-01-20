@@ -5,6 +5,8 @@ import com.coinbase.api.CoinbaseBuilder;
 import com.yachtmafia.config.Config;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.util.Set;
+
 public class ExchangeImpl implements Exchange {
     private Config config;
     private Coinbase cb;
@@ -33,6 +35,21 @@ public class ExchangeImpl implements Exchange {
 
     @Override
     public boolean withdrawToBank(String toCoinName, long purchasedAmount) {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public Set<String> getAvailableCoins() {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public String getLowestPrice(String symbolPair) {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public String getHighestPrice(String symbolPair) {
         throw new NotImplementedException();
     }
 }
