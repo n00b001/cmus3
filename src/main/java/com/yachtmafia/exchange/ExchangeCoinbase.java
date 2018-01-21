@@ -5,12 +5,10 @@ import com.coinbase.api.CoinbaseBuilder;
 import com.coinbase.api.exception.CoinbaseException;
 import com.yachtmafia.config.Config;
 import org.apache.log4j.Logger;
-import org.joda.money.CurrencyUnit;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 /**
@@ -33,12 +31,12 @@ public class ExchangeCoinbase implements Exchange {
     }
 
     @Override
-    public long exchangeCurrency(String from, String to, long amount) {
+    public String exchangeCurrency(String from, String to, String amount) {
         throw new NotImplementedException();
     }
 
     @Override
-    public boolean withdrawCrypto(String coinName, String address, long amount) {
+    public boolean withdrawCrypto(String coinName, String address, String amount) {
         throw new NotImplementedException();
     }
 
@@ -48,7 +46,7 @@ public class ExchangeCoinbase implements Exchange {
     }
 
     @Override
-    public boolean withdrawToBank(String toCoinName, long purchasedAmount) {
+    public boolean withdrawToBank(String toCoinName, String purchasedAmount) {
         throw new NotImplementedException();
     }
 

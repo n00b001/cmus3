@@ -18,7 +18,7 @@ public class WalletWrapperMock extends WalletWrapper {
     }
 
     @Override
-    public boolean sendTransaction(String privateKey, String publicAddress, String depositAddress, long amountOfCoin) {
+    public boolean sendTransaction(String privateKey, String publicAddress, String depositAddress, String amountOfCoin) {
         return true;
     }
 }

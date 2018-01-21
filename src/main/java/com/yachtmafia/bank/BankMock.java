@@ -4,12 +4,12 @@ import com.yachtmafia.exchange.Exchange;
 
 public class BankMock implements Bank {
     @Override
-    public boolean transferFromBankToExchange(String currency, long amount, Exchange exchange) {
+    public boolean transferFromBankToExchange(String currency, String amount, Exchange exchange) {
         return true;
     }
 
     @Override
-    public boolean payUser(String currency, long amount, String user) {
+    public boolean payUser(String currency, String amount, String user) {
         return true;
     }
 }

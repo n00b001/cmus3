@@ -32,7 +32,7 @@ public class DBWrapperImplTest {
 
     @Test
     public void addPortfolioBalance() throws Exception {
-        long purchasedAmount =100000000;// 1btc;
+        String purchasedAmount = String.valueOf(100000000);// 1btc;
         ConsumerRecord<String, String> consumerRecord = getDepositMessages(1).get(0);
         String recordString = consumerRecord.value();
         SwapMessage message = new SwapMessage(recordString);
@@ -44,8 +44,8 @@ public class DBWrapperImplTest {
     public void getFunds() throws Exception {
         String user = "PAMILA@gmail.com";
         String coin = "BTC";
-        double funds = dbWrapper.getFunds(user, coin);
-        assert funds == 0;
+        Double funds = dbWrapper.getFunds(user, coin);
+        assert funds != null;
     }
 
     @Test

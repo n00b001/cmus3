@@ -62,7 +62,7 @@ public class WithdrawHandler implements MessageHandler {
                 return false;
             }
 
-            long purchasedAmount = handlerDAO.getExchange().exchangeCurrency(swapMessage.getFromCoinName(),
+            String purchasedAmount = handlerDAO.getExchange().exchangeCurrency(swapMessage.getFromCoinName(),
                     swapMessage.getToCoinName(),
                     swapMessage.getAmountOfCoin());
             success = handlerDAO.getExchange().withdrawToBank(swapMessage.getToCoinName(), purchasedAmount);

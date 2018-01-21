@@ -15,29 +15,29 @@ public class ExchangeCoinbaseTest {
     ExchangeCoinbase exchangeCoinbase;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp()  {
         Config config = new Config();
         exchangeCoinbase = new ExchangeCoinbase(config);
     }
 
     @Test
-    public void exchangeCurrency() throws Exception {
+    public void exchangeCurrency()  {
     }
 
     @Test
-    public void withdrawCrypto() throws Exception {
+    public void withdrawCrypto() {
     }
 
     @Test
-    public void getDepositAddress() throws Exception {
+    public void getDepositAddress() {
     }
 
     @Test
-    public void withdrawToBank() throws Exception {
+    public void withdrawToBank()  {
     }
 
     @Test
-    public void getAvailableCoins() throws Exception {
+    public void getAvailableCoins()  {
         Set<String> availableCoins = exchangeCoinbase.getAvailableCoins();
         assert !availableCoins.isEmpty();
     }

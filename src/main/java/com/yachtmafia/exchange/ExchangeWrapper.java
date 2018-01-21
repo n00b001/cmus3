@@ -21,12 +21,12 @@ public class ExchangeWrapper implements Exchange {
     }
 
     @Override
-    public long exchangeCurrency(String from, String to, long amount) {
+    public String exchangeCurrency(String from, String to, String amount) {
         throw new NotImplementedException();
     }
 
     @Override
-    public boolean withdrawCrypto(String coinName, String address, long amount) {
+    public boolean withdrawCrypto(String coinName, String address, String amount) {
         throw new NotImplementedException();
     }
 
@@ -36,7 +36,7 @@ public class ExchangeWrapper implements Exchange {
     }
 
     @Override
-    public boolean withdrawToBank(String toCoinName, long purchasedAmount) {
+    public boolean withdrawToBank(String toCoinName, String purchasedAmount) {
         throw new NotImplementedException();
     }
 

@@ -27,7 +27,7 @@ public class WalletWrapper {
         walletAppKit.startAsync();
     }
 
-    public boolean sendTransaction(String privateKey, String publicAddress, String depositAddress, long amountOfCoin) {
+    public boolean sendTransaction(String privateKey, String publicAddress, String depositAddress, String amountOfCoin) {
         try {
             /**
              * todo: test
@@ -39,7 +39,8 @@ public class WalletWrapper {
 
             Address address = Address.fromBase58(MainNetParams.get(), depositAddress);
 
-            final Coin value = Coin.valueOf(amountOfCoin);
+            Long satoshis = Long.valueOf(amountOfCoin);
+            final Coin value = Coin.valueOf(satoshis);
             // Make sure this code is run in a single thread at once.
             SendRequest request = SendRequest.to(address, value);
 // The SendRequest object can be customized at this point to modify how the transaction will be created.

@@ -2,18 +2,17 @@ package com.yachtmafia.exchange;
 
 import com.yachtmafia.cryptoKeyPairs.BTC;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
 public class ExchangeMock implements Exchange {
     @Override
-    public long exchangeCurrency(String from, String to, long amount) {
+    public String exchangeCurrency(String from, String to, String amount) {
         return amount;
     }
 
     @Override
-    public boolean withdrawCrypto(String coinName, String address, long amount) {
+    public boolean withdrawCrypto(String coinName, String address, String amount) {
         return true;
     }
 
@@ -23,7 +22,7 @@ public class ExchangeMock implements Exchange {
     }
 
     @Override
-    public boolean withdrawToBank(String toCoinName, long purchasedAmount) {
+    public boolean withdrawToBank(String toCoinName, String purchasedAmount) {
         return true;
     }
 

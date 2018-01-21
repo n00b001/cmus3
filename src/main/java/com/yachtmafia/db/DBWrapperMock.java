@@ -20,13 +20,13 @@ public class DBWrapperMock implements DBWrapper {
     }
 
     @Override
-    public boolean addPortfolioBalance(SwapMessage message, long purchasedAmount) {
+    public boolean addPortfolioBalance(SwapMessage message, String purchasedAmount) {
         return true;
     }
 
     @Override
-    public double getFunds(String user, String coin) {
-        return 1;
+    public Double getFunds(String user, String coin) {
+        return 1d;
     }
 
     @Override

@@ -6,6 +6,8 @@ import org.apache.log4j.Logger;
 
 import java.sql.*;
 
+import static com.yachtmafia.util.Util.getCoinDoubleValue;
+
 
 public class DBWrapperImpl implements DBWrapper {
     private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
@@ -24,7 +26,7 @@ public class DBWrapperImpl implements DBWrapper {
     public boolean addNewWallet(String user, String coin, String publicAddress, String privateAddress) {
         String query =
                 "SELECT " +
-                        "    currencyId " +
+                        "    "+config.ID +" " +
                         " FROM " +
                         config.CURRENCIES_TABLE +
                         " WHERE " +
@@ -107,13 +109,16 @@ public class DBWrapperImpl implements DBWrapper {
     }
 
     @Override
-    public boolean addPortfolioBalance(SwapMessage message, long purchasedAmount) {
+    public boolean addPortfolioBalance(SwapMessage message, String toAmount) {
         boolean success = true;
+        String fromAmount = message.getAmountOfCoin();
+
         String currencyIDfrom = getCurrencyId(message.getFromCoinName());
+        String currencyIDto = getCurrencyId(message.getFromCoinName());
 
         String query =
                 "SELECT " +
-                        "    userId " +
+                        "    "+config.ID+" " +
                         " FROM " +
                         config.USERS_TABLE +
                         " WHERE " +
@@ -123,49 +128,16 @@ public class DBWrapperImpl implements DBWrapper {
             throw new RuntimeException("userId not found: " + message.getUsername());
         }
 
-        String amount = String.valueOf(-message.getAmountOfCoin());
+        double exchangeRate = getCoinDoubleValue(toAmount, message.getToCoinName())/
+                getCoinDoubleValue(fromAmount, message.getFromCoinName());
 
-        query =
-                "SELECT " +
-                        "    SUM(transactionDelta) " +
-                        " FROM " +
+        query = "INSERT INTO " +
                         config.PORTFOLIO_TABLE +
-                        " WHERE " +
-                        "    userId = '" + userId + "' AND currencyId = '" + currencyIDfrom + "'";
-        String runningTotal = getSingleQueryString(query);
-        if (runningTotal == null){
-            LOG.warn("User has no existing balance: " + message.toString());
-            runningTotal = "0";
-        }
-
-//        String leftSide = getSingleQueryString(query);
-//        String rightSide = getSingleQueryString(query);
-
-        query =
-                "INSERT INTO " +
-                        config.PORTFOLIO_TABLE +
-                        "    (currencyId, userId, transactionDelta, runningTotal)" +
+                        "    (from_currency_id, user_id, from_amount, to_amount, to_currency_id, exchange_rate)" +
                         " VALUES" +
-                        "    ('" + currencyIDfrom + "', '" + userId + "', '" + amount + "', '" + runningTotal + "')";
-        try (Connection con = DriverManager.getConnection(
-                config.connectionString,
-                config.username, config.password);
-             Statement stmt = con.createStatement()
-        ) {
-            int rs = stmt.executeUpdate(query);
-        } catch (SQLException e) {
-            LOG.error("Caught: ", e);
-            success = false;
-        }
+                        "    ('" + currencyIDfrom + "', '" + userId + "', '" + fromAmount + "', '"
+                        + toAmount + "', '" + currencyIDto + "', '" + exchangeRate + "')";
 
-        String currencyIDto = getCurrencyId(message.getFromCoinName());
-
-        query =
-                "INSERT INTO " +
-                        config.PORTFOLIO_TABLE +
-                        "    (currencyId, userId, transactionDelta, runningTotal) " +
-                        " VALUES" +
-                        "    ('" + currencyIDto + "', '" + userId + "', '" + purchasedAmount + "', '" + runningTotal + "')";
         try (Connection con = DriverManager.getConnection(
                 config.connectionString,
                 config.username, config.password);
@@ -182,7 +154,7 @@ public class DBWrapperImpl implements DBWrapper {
     private String getCurrencyId(String coinName) {
         String query =
                 "SELECT " +
-                        "    currencyId " +
+                        "    "+config.ID+" " +
                         " FROM " +
                         config.CURRENCIES_TABLE +
                         " WHERE " +
@@ -196,7 +168,7 @@ public class DBWrapperImpl implements DBWrapper {
 
 
     @Override
-    public double getFunds(String user, String coin) {
+    public Double getFunds(String user, String coin) {
         String query =
                 "SELECT " +
                         "   runningTotal " +
@@ -209,16 +181,15 @@ public class DBWrapperImpl implements DBWrapper {
         String funds = getSingleQueryString(query);
         if (funds != null) {
             return Double.parseDouble(funds);
-        } else {
-            return 0;
         }
+        return null;
     }
 
     @Override
     public String getPrivateKey(String user, String coin) {
         String query =
                 "SELECT " +
-                        "   privKey " +
+                        "   "+config.PRIVATE_KEY+" " +
                         " FROM " +
                         "    " + config.PRIVATE_TABLE + " P" +
                         "    INNER JOIN " + config.WALLETS_TABLE+" W ON P.walletId = W.walletId " +
@@ -233,10 +204,12 @@ public class DBWrapperImpl implements DBWrapper {
     public String getPublicAddress(String user, String coin) {
         String query =
                 "SELECT " +
-                        "   publicaddress " +
+                        "   "+config.PUBLIC_ADDRESS+" " +
                         " FROM " +
-                        "    " + config.WALLETS_TABLE + " W INNER JOIN " + config.USERS_TABLE + " U ON W.userID = U.userID " +
-                        "    INNER JOIN " + config.CURRENCIES_TABLE + " C ON C.currencyID = W.currencyID " +
+                        "    " + config.WALLETS_TABLE + " W INNER JOIN " + config.USERS_TABLE
+                        + " U ON W."+config.USER_ID+" = U."+config.ID+" " +
+                        "    INNER JOIN " + config.CURRENCIES_TABLE + " C " +
+                        " ON C."+config.CURRENCY_ID+" = W."+config.CURRENCY_ID+" " +
                         " WHERE " +
                         "    U.email = '" + user + "' AND C.symbol = '" + coin + "'";
         return getSingleQueryString(query);

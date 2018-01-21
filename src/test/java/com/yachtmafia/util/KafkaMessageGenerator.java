@@ -21,7 +21,7 @@ public class KafkaMessageGenerator {
             String value = "{'"+ SwapMessage.AMOUNT_OF_COIN_ATTRIB+"':'"+i+"', '"
                     +SwapMessage.FROM_CURRENCY_NAME_ATTRIB+"':'GBP', '"
                     +SwapMessage.TO_CURRENCY_NAME_ATTRIB+"':'BTC', '"+
-                    SwapMessage.USERNAME_ATTRIB + "':'PAMILA@gmail.com'}";
+                    SwapMessage.USERNAME_ATTRIB + "':'MarkRobins@gmail.com'}";
             records.add(new ConsumerRecord<>(DEPOSIT_TOPIC_NAME, 0, 0, null, value));
         }
         return records;
@@ -34,7 +34,7 @@ public class KafkaMessageGenerator {
             String value = "{'"+ SwapMessage.AMOUNT_OF_COIN_ATTRIB+"':'"+i+"', '"
                     +SwapMessage.FROM_CURRENCY_NAME_ATTRIB+"':'BTC', '"
                     +SwapMessage.TO_CURRENCY_NAME_ATTRIB+"':'GBP', '"+
-                    SwapMessage.USERNAME_ATTRIB + "':'PAMILA@gmail.com'}";
+                    SwapMessage.USERNAME_ATTRIB + "':'MarkRobins@gmail.com'}";
             records.add(new ConsumerRecord<>(WITHDRAW_TOPIC_NAME, 0, 0, null, value));
         }
         return records;
@@ -47,7 +47,7 @@ public class KafkaMessageGenerator {
             String value = "{'"+ SwapMessage.AMOUNT_OF_COIN_ATTRIB+"':'"+i+"', '"
                     +SwapMessage.FROM_CURRENCY_NAME_ATTRIB+"':'BTC', '"
                     +SwapMessage.TO_CURRENCY_NAME_ATTRIB+"':'ETH', '"+
-                    SwapMessage.USERNAME_ATTRIB + "':'PAMILA@gmail.com'}";
+                    SwapMessage.USERNAME_ATTRIB + "':'MarkRobins@gmail.com'}";
             records.add(new ConsumerRecord<>(SWAP_TOPIC_NAME, 0, 0, null, value));
         }
         return records;

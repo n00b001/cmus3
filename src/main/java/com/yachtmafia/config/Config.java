@@ -21,7 +21,14 @@ public class Config {
     public String USERS_TABLE = "users";
     public String WALLETS_TABLE = "wallets";
     public String PRIVATE_TABLE = "privatekeys";
-    public String PORTFOLIO_TABLE = "portfoliobalances";
+    public String PORTFOLIO_TABLE = "transactions";
+    public String JOBS_TABLE = "jobs";
+
+    public String PUBLIC_ADDRESS = "public_address";
+    public String CURRENCY_ID = "currency_id";
+    public String PRIVATE_KEY = "private_key";
+    public String USER_ID = "user_id";
+    public String ID = "id";
 
     public String CLIENT_ID_PAYPAL = "AbTewYvrX2Ts8bDNai80TeybnI8G9qKoPsUQoZN8Qs0fMvZZJsgCRBeRyIduGsuYLZ-sbgj47ZNeNFeV";
     public String CLIENT_SECRET_PAYPAL = "EBT3S1kHYZVH6Um_VlIfRRTEKTc86WzUniKvac770EL6J1T2ig77X2VrLWpfx4tBBBNwkQoCGXFhpjcK";

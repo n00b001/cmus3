@@ -16,7 +16,7 @@ public class BankImplTest {
     public void payUser() throws Exception {
         bank = new BankImpl(new Config());
         String currency = "GBP";
-        long amount = 100;
+        String amount = String.valueOf(100);
         String user = "PAMILA@gmail.com";
         boolean success = bank.payUser(currency, amount, user);
         assert success;
@@ -27,7 +27,7 @@ public class BankImplTest {
         bank = new BankImpl(new Config());
         Exchange exchange = new ExchangeMock();
         String currency = "GBP";
-        long amount = 100;
+        String amount = String.valueOf(100);
         boolean success = bank.transferFromBankToExchange(currency, amount, exchange);
         assert success;
     }

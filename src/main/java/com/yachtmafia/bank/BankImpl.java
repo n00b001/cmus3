@@ -8,8 +8,12 @@ import com.yachtmafia.exchange.Exchange;
 import org.apache.log4j.Logger;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.yachtmafia.util.Util.getCoinDoubleValue;
+import static com.yachtmafia.util.Util.getUnitsPerCoin;
 
 public class BankImpl implements Bank {
     private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
@@ -20,18 +24,14 @@ public class BankImpl implements Bank {
     }
 
     @Override
-    public boolean transferFromBankToExchange(String currency, long amount, Exchange exchange) {
+    public boolean transferFromBankToExchange(String currency, String amount, Exchange exchange) {
         throw new NotImplementedException();
     }
 
     @Override
-    public boolean payUser(String currency, long amount, String user) {
-        long unitsPerCoin = getUnitsPerCoin(currency);
-        if (unitsPerCoin == 0) {
-            LOG.error("Unknown currency: " + currency);
-            return false;
-        }
-        Currency paypalAmount = new Currency(currency, String.valueOf(amount / unitsPerCoin));
+    public boolean payUser(String currency, String amount, String user) {
+        Currency paypalAmount = new Currency(currency,
+                String.valueOf(getCoinDoubleValue(amount, currency)));
 
         PayoutItem payoutItem = new PayoutItem();
         payoutItem.setAmount(paypalAmount);
@@ -105,26 +105,6 @@ public class BankImpl implements Bank {
                     }
                 }
             }
-        }
-    }
-
-    private long getUnitsPerCoin(String currency) {
-        switch (currency) {
-            case "GBP":
-                return 100;
-            case "USD":
-                return 100;
-            case "EUR":
-                return 100;
-            case "JPY":
-                return 1000;
-            case "CHF":
-                return 100;
-            case "CAD":
-                return 100;
-            default:
-                LOG.fatal("UNKNOWN CURRENCY: " + currency);
-                return 0;
         }
     }
 }

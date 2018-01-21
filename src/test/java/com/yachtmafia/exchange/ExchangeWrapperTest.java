@@ -21,12 +21,12 @@ public class ExchangeWrapperTest {
     public void exchangeCurrency() throws Exception {
         String from = "GBP";
         String to = "BTC";
-        long amount = 10000; // 100gbp
-        long purchaseAmount = exchange.exchangeCurrency(from, to, amount);
+        String amount = String.valueOf(10000); // 100gbp
+        String purchaseAmount = exchange.exchangeCurrency(from, to, amount);
 
         from = "BTC";
         to = "GBP";
-        amount = 100000000; // 1btc
+        amount = String.valueOf(100000000); // 1btc
         purchaseAmount = exchange.exchangeCurrency(from, to, amount);
     }
 
@@ -34,7 +34,7 @@ public class ExchangeWrapperTest {
     public void withdrawCrypto() throws Exception {
         String coinName = "BTC";
         String address = "";
-        long amount = 100000000; // 1btc
+        String amount = String.valueOf(100000000); // 1btc
         boolean success = exchange.withdrawCrypto(coinName, address, amount);
         assert success;
     }
@@ -49,7 +49,7 @@ public class ExchangeWrapperTest {
     @Test
     public void withdrawToBank() throws Exception {
         String toCoinName = "BTC";
-        long purchasedAmount = 100000000; // 1btc
+        String purchasedAmount = String.valueOf(100000000); // 1btc
         boolean success = exchange.withdrawToBank(toCoinName, purchasedAmount);
         assert success;
     }
