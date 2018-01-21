@@ -17,7 +17,7 @@ public class BankImplTest {
         bank = new BankImpl(new Config());
         String currency = "GBP";
         String amount = String.valueOf(100);
-        String user = "PAMILA@gmail.com";
+        String user = "MarkRobins@gmail.com";
         boolean success = bank.payUser(currency, amount, user);
         assert success;
     }

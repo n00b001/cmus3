@@ -4,6 +4,8 @@ import com.yachtmafia.config.Config;
 import com.yachtmafia.messages.SwapMessage;
 import org.apache.log4j.Logger;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.*;
 
 import static com.yachtmafia.util.Util.getCoinDoubleValue;
@@ -30,7 +32,7 @@ public class DBWrapperImpl implements DBWrapper {
                         " FROM " +
                         config.CURRENCIES_TABLE +
                         " WHERE " +
-                        "    symbol = '" + coin + "'";
+                        "    "+config.SYMBOL+" = '" + coin + "'";
         String currencyID = getSingleQueryString(query);
         if (currencyID == null) {
             LOG.error("Currency not found: " + coin);
@@ -39,11 +41,11 @@ public class DBWrapperImpl implements DBWrapper {
 
         query =
                 "SELECT " +
-                        "    userId " +
+                        "    "+config.ID+" " +
                         "FROM " +
                         config.USERS_TABLE +
                         " WHERE " +
-                        "    email = '" + user + "'";
+                        "    "+config.EMAIL+" = '" + user + "'";
         String userId = getSingleQueryString(query);
         if (userId == null) {
             LOG.error("User not found: " + user);
@@ -68,7 +70,7 @@ public class DBWrapperImpl implements DBWrapper {
         query =
                 "INSERT INTO " +
                         config.WALLETS_TABLE +
-                        "    (currencyId, userId, publicaddress) " +
+                        "    ("+config.CURRENCY_ID+", "+config.USER_ID+", "+config.PUBLIC_ADDRESS+") " +
                         " VALUES " +
                         "    ('" + currencyID + "', '" + userId + "', '" + publicAddress + "') ";
 
@@ -91,7 +93,7 @@ public class DBWrapperImpl implements DBWrapper {
         query =
                 "INSERT INTO " +
                         config.PRIVATE_TABLE +
-                        "    (walletId, privKey) " +
+                        "    ("+config.WALLET_ID+", "+config.PRIVATE_KEY+") " +
                         " VALUES " +
                         "    ('" + walletId + "', '" + privateAddress + "') ";
         try (Connection con = DriverManager.getConnection(
@@ -112,9 +114,15 @@ public class DBWrapperImpl implements DBWrapper {
     public boolean addPortfolioBalance(SwapMessage message, String toAmount) {
         boolean success = true;
         String fromAmount = message.getAmountOfCoin();
+        if (null == fromAmount || "".equals(fromAmount) || "0".equals(fromAmount)){
+            throw new RuntimeException("Transaction from amount is invalid: " + fromAmount);
+        }
+        if (null == toAmount || "".equals(toAmount) || "0".equals(toAmount)){
+            throw new RuntimeException("Transaction to amount is invalid: " + toAmount);
+        }
 
         String currencyIDfrom = getCurrencyId(message.getFromCoinName());
-        String currencyIDto = getCurrencyId(message.getFromCoinName());
+        String currencyIDto = getCurrencyId(message.getToCoinName());
 
         String query =
                 "SELECT " +
@@ -122,21 +130,24 @@ public class DBWrapperImpl implements DBWrapper {
                         " FROM " +
                         config.USERS_TABLE +
                         " WHERE " +
-                        "    email = '" + message.getUsername() + "'";
+                        "    "+config.EMAIL+" = '" + message.getUsername() + "'";
         String userId = getSingleQueryString(query);
         if (userId == null){
             throw new RuntimeException("userId not found: " + message.getUsername());
         }
 
-        double exchangeRate = getCoinDoubleValue(toAmount, message.getToCoinName())/
-                getCoinDoubleValue(fromAmount, message.getFromCoinName());
+        RoundingMode roundingMode = RoundingMode.HALF_EVEN;
+        BigDecimal coinToDoubleValue = getCoinDoubleValue(toAmount, message.getToCoinName());
+        BigDecimal coinFromDoubleValue = getCoinDoubleValue(fromAmount, message.getFromCoinName());
+
+        BigDecimal exchangeRate = coinToDoubleValue.divide(coinFromDoubleValue, roundingMode);
 
         query = "INSERT INTO " +
                         config.PORTFOLIO_TABLE +
                         "    (from_currency_id, user_id, from_amount, to_amount, to_currency_id, exchange_rate)" +
                         " VALUES" +
                         "    ('" + currencyIDfrom + "', '" + userId + "', '" + fromAmount + "', '"
-                        + toAmount + "', '" + currencyIDto + "', '" + exchangeRate + "')";
+                        + toAmount + "', '" + currencyIDto + "', '" + exchangeRate.doubleValue() + "')";
 
         try (Connection con = DriverManager.getConnection(
                 config.connectionString,
@@ -158,7 +169,7 @@ public class DBWrapperImpl implements DBWrapper {
                         " FROM " +
                         config.CURRENCIES_TABLE +
                         " WHERE " +
-                        "    symbol = '" + coinName + "'";
+                        "    "+config.SYMBOL+" = '" + coinName + "'";
         String currencyID = getSingleQueryString(query);
         if (currencyID == null){
             throw new RuntimeException("Currency not found: " + coinName);
@@ -168,21 +179,43 @@ public class DBWrapperImpl implements DBWrapper {
 
 
     @Override
-    public Double getFunds(String user, String coin) {
+    public BigDecimal getFunds(String user, String coin) {
         String query =
                 "SELECT " +
-                        "   runningTotal " +
+                        "   SUM(to_amount) " +
                         " FROM " +
                         "    " + config.PORTFOLIO_TABLE + " P INNER JOIN " + config.USERS_TABLE
-                        + " U ON P.userID = U.userID " +
-                        "    INNER JOIN " + config.CURRENCIES_TABLE + " C ON C.currencyID = P.currencyID " +
+                        + " U ON P."+ config.USER_ID+" = U."+config.ID + " " +
+                        "    INNER JOIN " + config.CURRENCIES_TABLE + " C ON C."+config.ID+" = P."+config.TO_CURRENCY_ID+" " +
                         " WHERE " +
-                        "    U.email = '" + user + "' AND C.symbol = '" + coin + "'";
-        String funds = getSingleQueryString(query);
-        if (funds != null) {
-            return Double.parseDouble(funds);
+                        "    U."+config.EMAIL+" = '" + user + "' AND C."+config.SYMBOL+" = '" + coin + "'";
+        String toFunds = getSingleQueryString(query);
+
+        if (toFunds == null){
+            LOG.warn(String.format("No to funds found for user: %s and coin: %s", user, coin));
+            return null;
         }
-        return null;
+
+        query =
+                "SELECT " +
+                        "   SUM(from_amount) " +
+                        " FROM " +
+                        "    " + config.PORTFOLIO_TABLE + " P INNER JOIN " + config.USERS_TABLE
+                        + " U ON P."+ config.USER_ID+" = U."+config.ID + " " +
+                        "    INNER JOIN " + config.CURRENCIES_TABLE + " C ON C."+config.ID+" = P."+config.FROM_CURRENCY_ID+" " +
+                        " WHERE " +
+                        "    U."+config.EMAIL+" = '" + user + "' AND C."+config.SYMBOL+" = '" + coin + "'";
+        String fromFunds = getSingleQueryString(query);
+
+        if (fromFunds == null){
+            LOG.warn(String.format("No from funds found for user: %s and coin: %s", user, coin));
+            return null;
+        }
+
+        BigDecimal toFundsDec = BigDecimal.valueOf(Long.parseLong(toFunds));
+        BigDecimal fromFundsDec = BigDecimal.valueOf(Long.parseLong(fromFunds));
+
+        return toFundsDec.subtract(fromFundsDec);
     }
 
     @Override
@@ -192,11 +225,11 @@ public class DBWrapperImpl implements DBWrapper {
                         "   "+config.PRIVATE_KEY+" " +
                         " FROM " +
                         "    " + config.PRIVATE_TABLE + " P" +
-                        "    INNER JOIN " + config.WALLETS_TABLE+" W ON P.walletId = W.walletId " +
-                        "    INNER JOIN " + config.USERS_TABLE + " U ON W.userID = U.userID " +
-                        "    INNER JOIN " + config.CURRENCIES_TABLE + " C ON C.symbol = '" + coin + "'" +
+                        "    INNER JOIN " + config.WALLETS_TABLE+" W ON P."+config.WALLET_ID+" = W."+config.ID+" " +
+                        "    INNER JOIN " + config.USERS_TABLE + " U ON W."+config.USER_ID+" = U."+config.ID+" " +
+                        "    INNER JOIN " + config.CURRENCIES_TABLE + " C ON C."+config.SYMBOL+" = '" + coin + "'" +
                         " WHERE " +
-                        "    U.email = '" + user + "' AND C.symbol = '" + coin + "'";
+                        "    U."+config.EMAIL+" = '" + user + "' AND C."+config.SYMBOL+" = '" + coin + "'";
         return getSingleQueryString(query);
     }
 
@@ -209,9 +242,9 @@ public class DBWrapperImpl implements DBWrapper {
                         "    " + config.WALLETS_TABLE + " W INNER JOIN " + config.USERS_TABLE
                         + " U ON W."+config.USER_ID+" = U."+config.ID+" " +
                         "    INNER JOIN " + config.CURRENCIES_TABLE + " C " +
-                        " ON C."+config.CURRENCY_ID+" = W."+config.CURRENCY_ID+" " +
+                        " ON C."+config.ID+" = W."+config.CURRENCY_ID+" " +
                         " WHERE " +
-                        "    U.email = '" + user + "' AND C.symbol = '" + coin + "'";
+                        "    U."+config.EMAIL+" = '" + user + "' AND C."+config.SYMBOL+" = '" + coin + "'";
         return getSingleQueryString(query);
     }
 

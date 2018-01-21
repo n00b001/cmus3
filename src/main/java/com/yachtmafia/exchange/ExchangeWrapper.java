@@ -4,6 +4,7 @@ import com.yachtmafia.config.Config;
 import org.apache.log4j.Logger;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -51,6 +52,14 @@ public class ExchangeWrapper implements Exchange {
 
     @Override
     public String getLowestPrice(String symbolPair) {
+        exchanges.stream()
+                .min((a,b) -> Comparator.comparingLong(
+                        Long.parseLong(a.getLowestPrice(symbolPair)),
+                        Long.parseLong(b.getLowestPrice(symbolPair))));
+        for(Exchange e : exchanges){
+            String lowestPrice = e.getLowestPrice(symbolPair);
+
+        }
         throw new NotImplementedException();
     }
 

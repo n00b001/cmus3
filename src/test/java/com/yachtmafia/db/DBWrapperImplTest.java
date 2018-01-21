@@ -6,6 +6,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.math.BigDecimal;
+
 import static com.yachtmafia.util.KafkaMessageGenerator.getDepositMessages;
 import static org.junit.Assert.*;
 
@@ -22,7 +24,7 @@ public class DBWrapperImplTest {
 
     @Test
     public void addNewWallet() throws Exception {
-        String user = "PAMILA@gmail.com";
+        String user = "MarkRobins@gmail.com";
         String coin = "BTC";
         String publicAddress = "";
         String privateAddress = "";
@@ -42,15 +44,15 @@ public class DBWrapperImplTest {
 
     @Test
     public void getFunds() throws Exception {
-        String user = "PAMILA@gmail.com";
+        String user = "MarkRobins@gmail.com";
         String coin = "BTC";
-        Double funds = dbWrapper.getFunds(user, coin);
+        BigDecimal funds = dbWrapper.getFunds(user, coin);
         assert funds != null;
     }
 
     @Test
     public void getPrivateKey() throws Exception {
-        String user = "PAMILA@gmail.com";
+        String user = "MarkRobins@gmail.com";
         String coin = "BTC";
         String privateKey = dbWrapper.getPrivateKey(user, coin);
         assert privateKey != null;
@@ -58,7 +60,7 @@ public class DBWrapperImplTest {
 
     @Test
     public void getPublicAddress() throws Exception {
-        String user = "PAMILA@gmail.com";
+        String user = "MarkRobins@gmail.com";
         String coin = "BTC";
         String publicAddress = dbWrapper.getPublicAddress(user, coin);
         assert publicAddress != null;

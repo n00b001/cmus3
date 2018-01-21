@@ -8,33 +8,36 @@ import java.math.RoundingMode;
  * Created by xfant on 2018-01-20.
  */
 public class Util {
-    private final static Logger LOG = Logger.getLogger(Util.class.getSimpleName());
+    private static final Logger LOG = Logger.getLogger(Util.class.getSimpleName());
+    private static final int PRECISION = 20;
 
-    public static double getCoinDoubleValue(String amount, String currencySymbol) {
+    private Util() {
+    }
+
+    public static BigDecimal getCoinDoubleValue(String amount, String currencySymbol) {
         BigDecimal unitsPerCoin = getUnitsPerCoin(currencySymbol);
 
         BigDecimal amountBigInt = BigDecimal .valueOf(Long.parseLong(amount));
         RoundingMode roundingMode = RoundingMode.FLOOR;
-        BigDecimal decimalBig = amountBigInt.divide(unitsPerCoin, roundingMode);
-        return decimalBig.doubleValue();
+        return amountBigInt.divide(unitsPerCoin, PRECISION, roundingMode);
     }
 
     public static BigDecimal getUnitsPerCoin(String currency) {
         switch (currency) {
             case "GBP":
-                return BigDecimal.valueOf(100);
+                return BigDecimal.valueOf(100L);
             case "USD":
-                return BigDecimal.valueOf(100);
+                return BigDecimal.valueOf(100L);
             case "EUR":
-                return BigDecimal.valueOf(100);
+                return BigDecimal.valueOf(100L);
             case "JPY":
-                return BigDecimal.valueOf(1000);
+                return BigDecimal.valueOf(1000L);
             case "CHF":
-                return BigDecimal.valueOf(100);
+                return BigDecimal.valueOf(100L);
             case "CAD":
-                return BigDecimal.valueOf(100);
+                return BigDecimal.valueOf(100L);
             case "BTC":
-                return BigDecimal.valueOf(100000000);
+                return BigDecimal.valueOf(100000000L);
             case "ETH":
                 return BigDecimal.valueOf(1000000000000000000L);
             default:

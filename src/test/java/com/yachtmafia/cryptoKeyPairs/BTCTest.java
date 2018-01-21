@@ -4,7 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class BTCTest {
-    private static final int NUM_OF_TESTS = 100_000;
+    private static final int NUM_OF_TESTS = 1_000;
     private BTC btc;
 
     @Before

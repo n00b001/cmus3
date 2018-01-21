@@ -18,7 +18,7 @@ public class KafkaMessageGenerator {
         List<ConsumerRecord<String, String>> records = new ArrayList<>();
 
         for (long i=0;i<amountOfMessage;i++) {
-            String value = "{'"+ SwapMessage.AMOUNT_OF_COIN_ATTRIB+"':'"+i+"', '"
+            String value = "{'"+ SwapMessage.AMOUNT_OF_COIN_ATTRIB+"':'"+(i+1)+"', '"
                     +SwapMessage.FROM_CURRENCY_NAME_ATTRIB+"':'GBP', '"
                     +SwapMessage.TO_CURRENCY_NAME_ATTRIB+"':'BTC', '"+
                     SwapMessage.USERNAME_ATTRIB + "':'MarkRobins@gmail.com'}";
