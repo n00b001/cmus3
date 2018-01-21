@@ -22,18 +22,31 @@ public class ExchangeCoinbaseTest {
 
     @Test
     public void exchangeCurrency()  {
+        String from = "GBP";
+        String to = "BTC";
+        String amount = "100";
+        exchangeCoinbase.exchangeCurrency(from, to, amount);
     }
 
     @Test
     public void withdrawCrypto() {
+        String coinName = "BTC";
+        String address = "";
+        String amount = "100000000";
+        exchangeCoinbase.withdrawCrypto(coinName, address, amount);
     }
 
     @Test
     public void getDepositAddress() {
+        String fromCoinName = "BTC";
+        exchangeCoinbase.getDepositAddress(fromCoinName);
     }
 
     @Test
     public void withdrawToBank()  {
+        String toCoinName = "GBP";
+        String purchasedAMount = "100";
+        exchangeCoinbase.withdrawToBank(toCoinName, purchasedAMount);
     }
 
     @Test

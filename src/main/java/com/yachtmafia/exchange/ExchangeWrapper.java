@@ -6,6 +6,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.OptionalLong;
 import java.util.Set;
 
 public class ExchangeWrapper implements Exchange {
@@ -52,20 +53,29 @@ public class ExchangeWrapper implements Exchange {
 
     @Override
     public String getLowestPrice(String symbolPair) {
-        exchanges.stream()
-                .min((a,b) -> Comparator.comparingLong(
-                        Long.parseLong(a.getLowestPrice(symbolPair)),
-                        Long.parseLong(b.getLowestPrice(symbolPair))));
-        for(Exchange e : exchanges){
-            String lowestPrice = e.getLowestPrice(symbolPair);
+        OptionalLong min = exchanges
+                .stream()
+                .mapToLong(a -> Long.parseLong(a.getLowestPrice(symbolPair)))
+                .min();
 
+        String returnVal = null;
+        if (min.isPresent()){
+            returnVal = String.valueOf(min.getAsLong());
         }
-        throw new NotImplementedException();
+        return returnVal;
     }
-
     @Override
     public String getHighestPrice(String symbolPair) {
-        throw new NotImplementedException();
+        OptionalLong max = exchanges
+                .stream()
+                .mapToLong(a -> Long.parseLong(a.getHighestPrice(symbolPair)))
+                .max();
+
+        String returnVal = null;
+        if (max.isPresent()){
+            returnVal = String.valueOf(max.getAsLong());
+        }
+        return returnVal;
     }
 
 
