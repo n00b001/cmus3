@@ -1,6 +1,8 @@
 package com.yachtmafia.db;
 
 import com.yachtmafia.config.Config;
+import com.yachtmafia.cryptoKeyPairs.CryptoKeyPair;
+import com.yachtmafia.cryptoKeyPairs.CryptoKeyPairGenerator;
 import com.yachtmafia.messages.SwapMessage;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.Before;
@@ -26,9 +28,8 @@ public class DBWrapperImplTest {
     public void addNewWallet() throws Exception {
         String user = "MarkRobins@gmail.com";
         String coin = "BTC";
-        String publicAddress = "";
-        String privateAddress = "";
-        boolean success = dbWrapper.addNewWallet(user, coin, publicAddress, privateAddress);
+        CryptoKeyPair keyPair = CryptoKeyPairGenerator.parse(coin);
+        boolean success = dbWrapper.addNewWallet(user, coin, keyPair.getPublicAddress(), keyPair.getPrivateKey());
         assert success;
     }
 

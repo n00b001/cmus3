@@ -52,57 +52,79 @@ public class DBWrapperImpl implements DBWrapper {
             return false;
         }
 
-//        String amount = String.valueOf(message.getAmountOfCoin());
-
-
-//        query =
-//                "SELECT " +
-//                "    SUM(amount) " +
-//                "FROM "+
-//                "    portfoliobalances " +
-//                "WHERE "+
-//                "    userId = '" + userId + "' AND currencyId = '" + currencyID + "'";
-//        String runningTotal = getSingleQueryString(query);
-
-//        String leftSide = getSingleQueryString(query);
-//        String rightSide = getSingleQueryString(query);
-
         query =
-                "INSERT INTO " +
-                        config.WALLETS_TABLE +
-                        "    ("+config.CURRENCY_ID+", "+config.USER_ID+", "+config.PUBLIC_ADDRESS+") " +
-                        " VALUES " +
-                        "    ('" + currencyID + "', '" + userId + "', '" + publicAddress + "') ";
+                "SELECT " + config.ID + " FROM " +
+                        config.WALLETS_TABLE + " WHERE " + config.CURRENCY_ID
+                        + " = " + currencyID + " AND " + config.USER_ID + " = " + userId
+                        + " AND " + config.PUBLIC_ADDRESS + " is not null";
+        String userWallet = getSingleQueryString(query);
 
-        String walletId;
+        if (userWallet != null) {
+            query =
+                    "SELECT "+config.ID+" FROM " +
+                            config.PRIVATE_TABLE + " WHERE " + config.WALLET_ID
+                            + " = " + userWallet + " AND " + config.PRIVATE_KEY + " is not null";
+            String userPrivatekey = getSingleQueryString(query);
+            if (userPrivatekey != null){
+                LOG.info("User already has wallet!");
+                return true;
+            }else{
+                /**
+                 * create private key
+                 */
+                return insertPrivateKey(privateAddress, userWallet);
+            }
+        }else{
+            /**
+             * create wallet and private key
+             */
+            query =
+                    "INSERT INTO " +
+                            config.WALLETS_TABLE +
+                            "    ("+config.CURRENCY_ID+", "+config.USER_ID+", "+config.PUBLIC_ADDRESS+") " +
+                            " VALUES " +
+                            "    ('" + currencyID + "', '" + userId + "', '" + publicAddress + "') ";
 
-        try(Connection con= DriverManager.getConnection(
-                config.connectionString,
-                config.username, config.password);
-            Statement stmt = con.createStatement()
-        ){
-            int rs = stmt.executeUpdate(query);
-            walletId = String.valueOf(rs);
-//            LOG.info(rs);
-//            rs.close();
-        } catch (SQLException e) {
-            LOG.error("Caught: ", e);
-            return false;
+            String walletId;
+
+            try(Connection con= DriverManager.getConnection(
+                    config.connectionString,
+                    config.username, config.password);
+                Statement stmt = con.createStatement()
+            ){
+                int rs = stmt.executeUpdate(query, Statement.RETURN_GENERATED_KEYS);
+                try(ResultSet generatedKeys = stmt.getGeneratedKeys();) {
+                    if (generatedKeys.next()) {
+                        walletId = String.valueOf(generatedKeys.getLong(1));
+                    }
+                    else {
+                        LOG.error("Failed to add wallet");
+                        return false;
+                    }
+                }
+            } catch (SQLException e) {
+                LOG.error("Caught: ", e);
+                return false;
+            }
+
+            return insertPrivateKey(privateAddress, walletId);
         }
+    }
 
+    private boolean insertPrivateKey(String privateAddress, String userWallet) {
+        String query;
         query =
                 "INSERT INTO " +
                         config.PRIVATE_TABLE +
                         "    ("+config.WALLET_ID+", "+config.PRIVATE_KEY+") " +
                         " VALUES " +
-                        "    ('" + walletId + "', '" + privateAddress + "') ";
+                        "    ('" + userWallet + "', '" + privateAddress + "') ";
         try (Connection con = DriverManager.getConnection(
                 config.connectionString,
                 config.username, config.password);
              Statement stmt = con.createStatement()
         ) {
-            int rs = stmt.executeUpdate(query);
-            LOG.debug(rs);
+            stmt.executeUpdate(query);
         } catch (SQLException e) {
             LOG.error("Caught: ", e);
             return false;
@@ -154,7 +176,7 @@ public class DBWrapperImpl implements DBWrapper {
                 config.username, config.password);
              Statement stmt = con.createStatement()
         ) {
-            int rs = stmt.executeUpdate(query);
+            stmt.executeUpdate(query);
         } catch (SQLException e) {
             LOG.error("Caught: ", e);
             success = false;
