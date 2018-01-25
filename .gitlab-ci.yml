@@ -14,6 +14,11 @@ variables:
 before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
 
+stages:
+  - build
+  - test
+  - deploy
+
 build:
   stage: build
   script: gradle assemble --stacktrace
@@ -23,7 +28,6 @@ build:
     paths:
       - build
       - .gradle
-
 
 test:
   stage: test
@@ -35,3 +39,23 @@ test:
       - build
       - .gradle
 
+deploy-build:
+  stage: deploy
+  script: gradle buildFatJar --stacktrace
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: push
+    paths:
+      - build
+      - .gradle
+
+deploy:
+  stage: deploy
+  script:
+    - gcloud compute scp build/libs/cmus-1.0-SNAPSHOT.jar yachtmafia01@cmus-dev:/home/yachtmafia01/.
+  cache:
+    key: "$CI_COMMIT_REF_NAME"
+    policy: push
+    paths:
+      - build
+      - .gradle
