@@ -17,7 +17,6 @@ before_script:
 stages:
   - build
   - test
-  - deploy-build
   - deploy
 
 build:
@@ -40,24 +39,12 @@ test:
       - build
       - .gradle
 
-deploy-build:
-  stage: deploy-build
-  script:
-    - pwd
-    - whoami
-    - gradle buildFatJar
-  cache:
-    key: "$CI_COMMIT_REF_NAME"
-    policy: push
-    paths:
-      - build
-      - .gradle
-
 deploy:
   stage: deploy
   script:
     - pwd
     - whoami
+    - gradle buildFatJar
     - gcloud compute scp --zone europe-west2-a build/libs/cmus-1.0-SNAPSHOT.jar yachtmafia01@cmus-dev:/home/yachtmafia01/.
   cache:
     key: "$CI_COMMIT_REF_NAME"
