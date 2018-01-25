@@ -42,7 +42,10 @@ test:
 
 deploy-build:
   stage: deploy-build
-  script: gradle buildFatJar
+  script:
+    - pwd
+    - whoami
+    - gradle buildFatJar
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: push
