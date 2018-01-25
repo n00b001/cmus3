@@ -17,6 +17,7 @@ before_script:
 stages:
   - build
   - test
+  - deploy-build
   - deploy
 
 build:
