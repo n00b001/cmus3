@@ -2,6 +2,7 @@ package com.yachtmafia.exchange;
 
 import com.yachtmafia.config.Config;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Set;
@@ -9,6 +10,7 @@ import java.util.Set;
 /**
  * Created by xfant on 2018-01-14.
  */
+@Ignore
 public class ExchangeWrapperTest {
     Exchange exchange;
     @Before

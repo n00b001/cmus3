@@ -2,6 +2,7 @@ package com.yachtmafia.exchange;
 
 import com.yachtmafia.config.Config;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Set;
@@ -11,6 +12,7 @@ import static org.junit.Assert.*;
 /**
  * Created by xfant on 2018-01-20.
  */
+@Ignore
 public class ExchangeCoinbaseTest {
     ExchangeCoinbase exchangeCoinbase;
 

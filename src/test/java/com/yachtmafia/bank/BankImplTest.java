@@ -22,7 +22,7 @@ public class BankImplTest {
         assert success;
     }
 
-    @Test
+    @Test @Ignore
     public void toExchange() throws Exception {
         bank = new BankImpl(new Config());
         Exchange exchange = new ExchangeMock();
