@@ -55,4 +55,17 @@ public class ExchangeCoinbaseTest {
         assert !availableCoins.isEmpty();
     }
 
+    @Test
+    public void getLowest() throws Exception {
+        String symbolPair = "BTCGBP";
+        String lowestPrice = exchangeCoinbase.getLowestPrice(symbolPair);
+        assert lowestPrice != null;
+    }
+
+    @Test
+    public void getHighest() throws Exception {
+        String symbolPair = "BTCGBP";
+        String highestPrice = exchangeCoinbase.getHighestPrice(symbolPair);
+        assert highestPrice != null;
+    }
 }

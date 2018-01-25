@@ -61,4 +61,19 @@ public class ExchangeWrapperTest {
         Set<String> availableCoins = this.exchange.getAvailableCoins();
         assert !availableCoins.isEmpty();
     }
+
+
+    @Test
+    public void getLowest() throws Exception {
+        String symbolPair = "BTCGBP";
+        String lowestPrice = exchange.getLowestPrice(symbolPair);
+        assert lowestPrice != null;
+    }
+
+    @Test
+    public void getHighest() throws Exception {
+        String symbolPair = "BTCGBP";
+        String highestPrice = exchange.getHighestPrice(symbolPair);
+        assert highestPrice != null;
+    }
 }
