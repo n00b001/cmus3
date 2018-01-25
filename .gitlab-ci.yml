@@ -46,7 +46,7 @@ deploy:
     - whoami
     - gradle buildFatJar
     - gcloud compute scp --zone europe-west2-a build/libs/cmus-1.0-SNAPSHOT-standalone.jar yachtmafia01@cmus-dev:/home/yachtmafia01/.
-    - gcloud compute ssh --zone europe-west2-a -- '/etc/init.d/cmus restart'
+    - gcloud compute ssh --zone europe-west2-a cmus-dev -- '/etc/init.d/cmus restart'
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: push
