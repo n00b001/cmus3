@@ -52,7 +52,7 @@ deploy-build:
 deploy:
   stage: deploy
   script:
-    - gcloud compute scp build/libs/cmus-1.0-SNAPSHOT.jar yachtmafia01@cmus-dev:/home/yachtmafia01/.
+    - gcloud compute scp --zone europe-west2-a build/libs/cmus-1.0-SNAPSHOT.jar yachtmafia01@cmus-dev:/home/yachtmafia01/.
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: push
