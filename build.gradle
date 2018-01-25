@@ -38,6 +38,7 @@ dependencies {
 
 task buildFatJar(type: OneJar) {
     mainClass = 'com.yachtmafia.Main'
+    mergeManifestFromJar = true
 }
 
 artifacts {
