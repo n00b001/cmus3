@@ -41,8 +41,8 @@ test:
       - .gradle
 
 deploy-build:
-  stage: deploy
-  script: gradle buildFatJar --stacktrace
+  stage: deploy-build
+  script: gradle buildFatJar
   cache:
     key: "$CI_COMMIT_REF_NAME"
     policy: push
