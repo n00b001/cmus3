@@ -14,7 +14,6 @@ public class ConsumerTest {
     Consumer consumer;
 
     @Test
-    @Ignore
     public void run() throws Exception {
         Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG,
@@ -33,7 +32,14 @@ public class ConsumerTest {
 
         consumer = new Consumer(props, null);
         consumer.subscribe(Arrays.asList("my-topic"));
-        consumer.run();
+//        consumer.run();
+
+        Thread thread = new Thread(consumer);
+        thread.start();
+        Thread.sleep(5000);
+        thread.interrupt();
+        consumer.stop();
+        Thread.sleep(5000);
     }
 
 }

@@ -4,7 +4,9 @@ import com.yachtmafia.handlers.MessageHandler;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.log4j.Logger;
+//import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.List;
@@ -12,9 +14,12 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Future;
 
+import static com.yachtmafia.util.LoggerMaker.logError;
+import static com.yachtmafia.util.LoggerMaker.logInfo;
+
 public class Consumer implements Runnable{
 
-    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
+//    private final Logger LOG = LoggerFactory.getLogger(getClass());
     private Set<Future<Boolean>> set = new HashSet<>();
     //kafka Consumer object
     private KafkaConsumer<String, String> consumer;
@@ -22,7 +27,7 @@ public class Consumer implements Runnable{
     private List<MessageHandler> listeners;
 
     public Consumer(Properties props, List<MessageHandler> listeners){
-        LOG.info("Configuring Consumer...");
+        logInfo(getClass(), "Configuring Consumer...");
         this.listeners = listeners;
         consumer = new KafkaConsumer<>(props);
     }
@@ -30,18 +35,18 @@ public class Consumer implements Runnable{
     public void subscribe(List<String> topics){
         //subscribe to topic
 
-        LOG.info(String.format("Subscribing to: %s", topics.toString()));
+        logInfo(getClass(), String.format("Subscribing to: %s", topics.toString()));
         consumer.subscribe(topics);
     }
 
     public void stop(){
-        LOG.info("Stopping Consumer...");
+        logInfo(getClass(), "Stopping Consumer...");
         running = false;
     }
 
     @Override
     public void run() {
-        LOG.info("Starting Consumer...");
+        logInfo(getClass(), "Starting Consumer...");
         while (running && !Thread.currentThread().isInterrupted()) {
             try {
                 ConsumerRecords<String, String> records = consumer.poll(0);
@@ -49,14 +54,18 @@ public class Consumer implements Runnable{
                     for (MessageHandler handler : listeners) {
                         callListener(record, handler);
                     }
-//                LOG.info(String.format("offset = %d, key = %s, value = %s\n", record.offset(), record.key(), record.value()));
+//                logInfo(getClass(), String.format("offset = %d, key = %s, value = %s\n", record.offset(), record.key(), record.value()));
 //                System.out.printf("offset = %d, key = %s, value = %s\n", record.offset(), record.key(), record.value());
                 }
                 Boolean success = getSuccess();
                 set.clear();
                 commitOnSuccess(records, success);
-            } catch (Exception e) {
-                LOG.error("Caught exception: ", e);
+            } catch (InterruptedException e) {
+//                logError(getClass(), "Caught exception: ", e);
+                running = false;
+                Thread.currentThread().interrupt();
+            }catch (Exception e) {
+                logError(getClass(), "Caught exception: ", e);
             }
         }
 
@@ -68,7 +77,7 @@ public class Consumer implements Runnable{
             Future<Boolean> future = handler.run(record);
             set.add(future);
         } catch (Exception e) {
-            LOG.error("Caught exception: ", e);
+            logError(getClass(), "Caught exception: ", e);
             consumer.commitAsync();
         }
     }
@@ -79,9 +88,9 @@ public class Consumer implements Runnable{
              * Do nothing
              */
         } else if (!success) {
-            LOG.error("Could not process: ");
+            logError(getClass(), "Could not process: ");
             for (ConsumerRecord<String, String> msg : records) {
-                LOG.error(msg.value());
+                logError(getClass(), msg.value());
             }
         } else {
             consumer.commitSync();

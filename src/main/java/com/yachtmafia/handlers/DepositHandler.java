@@ -4,16 +4,20 @@ import com.yachtmafia.cryptoKeyPairs.CryptoKeyPair;
 import com.yachtmafia.cryptoKeyPairs.CryptoKeyPairGenerator;
 import com.yachtmafia.messages.SwapMessage;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import static com.yachtmafia.util.Const.DEPOSIT_TOPIC_NAME;
+import static com.yachtmafia.util.LoggerMaker.logError;
+import static com.yachtmafia.util.LoggerMaker.logInfo;
 
 public class DepositHandler implements MessageHandler {
     private static final String TOPIC_NAME = DEPOSIT_TOPIC_NAME;
-    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
+//    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
+
     private final HandlerDAO handlerDAO;
     private ExecutorService pool;
     private ConsumerRecord<String, String> message;
@@ -37,7 +41,7 @@ public class DepositHandler implements MessageHandler {
     public Boolean call() throws Exception {
         if (TOPIC_NAME.equals(message.topic())) {
             SwapMessage swapMessage = new SwapMessage(message.value());
-            LOG.info(swapMessage);
+            logInfo(getClass(), "swapMessage: " + swapMessage.toString());
             String publicAddress = handlerDAO.getDbWrapper().getPublicAddress(swapMessage.getUsername(),
                     swapMessage.getToCoinName());
             if (publicAddress == null){
@@ -47,20 +51,20 @@ public class DepositHandler implements MessageHandler {
                             swapMessage.getToCoinName(),
                             keyPair.getPublicAddress(), keyPair.getPrivateKey());
                     if (!success) {
-                        LOG.fatal("Did not add wallet successfully! " + message.toString());
+                        logError(getClass(), "Did not add wallet successfully! "+ message);
                         return false;
                     }
                     publicAddress = keyPair.getPublicAddress();
                 }catch (Exception e){
-                    LOG.fatal("Did not add wallet successfully! " + message.toString(), e);
+                    logError(getClass(), "Did not add wallet successfully! " + message.toString(), e);
                     return false;
                 }
             }
             boolean success = handlerDAO.getBank().transferFromBankToExchange(swapMessage.getFromCoinName(),
                     swapMessage.getAmountOfCoin(), handlerDAO.getExchange());
             if (!success){
-                LOG.fatal("Did not transfer balance from com.yachtmafia.bank to com.yachtmafia.exchange! "
-                        + message.toString());
+                logError(getClass(), "Did not transfer balance from com.yachtmafia.bank to com.yachtmafia.exchange! "
+                         + message);
                 return false;
             }
             String purchasedAmount = handlerDAO.getExchange().exchangeCurrency(swapMessage.getFromCoinName(),
@@ -69,12 +73,12 @@ public class DepositHandler implements MessageHandler {
             success = handlerDAO.getExchange().withdrawCrypto(swapMessage.getToCoinName(), publicAddress,
                     purchasedAmount);
             if (!success){
-                LOG.fatal("Did not withdraw coins! " + message.toString());
+                logError(getClass(), "Did not withdraw coins! " + message);
                 return false;
             }
             success = handlerDAO.getDbWrapper().addPortfolioBalance(swapMessage, purchasedAmount);
             if (!success){
-                LOG.fatal("Did not add portfolio balance! " + message.toString());
+                logError(getClass(), "Did not add portfolio balance! " + message);
                 return false;
             }
             return true;

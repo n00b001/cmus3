@@ -1,7 +1,6 @@
 package com.yachtmafia.walletwrapper;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import org.apache.log4j.Logger;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.ECKey;
@@ -10,16 +9,23 @@ import org.bitcoinj.kits.WalletAppKit;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.wallet.SendRequest;
 import org.bitcoinj.wallet.Wallet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.yachtmafia.util.LoggerMaker.logError;
+import static com.yachtmafia.util.LoggerMaker.logInfo;
+
 /**
  * Created by xfant on 2018-01-07.
  */
 public class WalletWrapper {
-    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
+//    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
+
+//    private final Logger LOG = LoggerFactory.getLogger(getClass());
     private File file = new File(".");
     private WalletAppKit walletAppKit = new WalletAppKit(MainNetParams.get(), file, "");
 
@@ -55,10 +61,10 @@ public class WalletWrapper {
 // Here, we just wait for it to finish, but we can also attach a listener that'll get run on a background
 // thread when finished. Or we could just assume the network accepts the transaction and carry on.
             Transaction transaction = future.get();
-            LOG.info(transaction);
+            logInfo(getClass(), "Transaction: " + transaction);
             return true;
         } catch (Exception e) {
-            LOG.error("CAUGHT", e);
+            logError(getClass(), "CAUGHT", e);
             return false;
         }
     }

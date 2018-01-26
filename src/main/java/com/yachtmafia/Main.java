@@ -11,7 +11,8 @@ import com.yachtmafia.handlers.*;
 import com.yachtmafia.kafka.Consumer;
 import com.yachtmafia.walletwrapper.WalletWrapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,10 +22,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static com.yachtmafia.util.Const.*;
+import static com.yachtmafia.util.LoggerMaker.logError;
+import static com.yachtmafia.util.LoggerMaker.logInfo;
 
 public class Main implements Thread.UncaughtExceptionHandler{
 
-    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
+//    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
+
+//    private final Logger LOG = LoggerFactory.getLogger(getClass());
     //    private Consumer consumer = new Consumer();
 //    private Producer producer = new Producer();
     private List<Thread> threads = new ArrayList<>();
@@ -127,10 +132,10 @@ public class Main implements Thread.UncaughtExceptionHandler{
             }
         }
         catch (InterruptedException ex){
-            LOG.error("Caught error! ", ex);
+            logError(getClass(), "Caught error! ", ex);
             Thread.currentThread().interrupt();
         }
-        LOG.info("Shutting down...");
+        logInfo(getClass(), "Shutting down...");
         for(Thread t : threads){
             t.interrupt();
         }
@@ -184,6 +189,6 @@ public class Main implements Thread.UncaughtExceptionHandler{
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
-        LOG.error(String.format("Caught from thread: %s: ", t.toString()), e);
+        logError(getClass(), String.format("Caught from thread: %s: ", t.toString()), e);
     }
 }

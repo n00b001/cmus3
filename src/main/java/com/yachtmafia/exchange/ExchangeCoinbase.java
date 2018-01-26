@@ -4,12 +4,16 @@ import com.coinbase.api.Coinbase;
 import com.coinbase.api.CoinbaseBuilder;
 import com.coinbase.api.exception.CoinbaseException;
 import com.yachtmafia.config.Config;
-import org.apache.log4j.Logger;
+//import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+
+import static com.yachtmafia.util.LoggerMaker.logError;
 
 /**
  * Created by xfant on 2018-01-20.
@@ -17,7 +21,8 @@ import java.util.Set;
 public class ExchangeCoinbase implements Exchange {
     private Coinbase cb;
     private Config config;
-    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
+//    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
+
 
     public ExchangeCoinbase(Config config) {
         this.config = config;
@@ -57,7 +62,7 @@ public class ExchangeCoinbase implements Exchange {
             cb.getSupportedCurrencies().forEach(
                     a -> returnSet.add(a.getSymbol()));
         } catch (CoinbaseException| IOException e) {
-            LOG.error("Caught: " + e);
+            logError(getClass(), "Caught: " + e);
         }
         return returnSet;
     }

@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "cryptobox-188614",
+  "private_key_id": "e344a0a3f9dccf26da945496106f468fa103fe9e",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCZ/S1nz5uZggLZ\n0pxaHH96W4r1GqK4pZQW1YSNYhFAc4DKV7gYwrIBY6IIvu4dAaP34f52R8NbMosT\naD4LdiibdpA+tHt0E5IecdsF2R1VAEfKKePMN8Btm2gnk0i2l/9X0k/X+8OfRAxI\nE4ihbUJMWY7AYlck21esSFaimy3JgMdOp/5DJON+hCBCmga0z4gmjXLA9AUXlgY2\nyvccrwjyMrttcYA8FxzJ7V/dN7EScIY2tRPPDV6iAHGwZ7RO5rBImEAvXpsvOdiJ\nDuwQxy56guSptRmbMzY+KNpXLkLhGeU5Vz11Ixesa5vAaKVoVYmYHE+8qF1aKTYJ\njSZdFAqpAgMBAAECggEALYj3ychS30BaPnYwhNcDfTefrh37uzU/RsdJxJMYveHJ\n1ku9JRlBkPaY3hQzjkFDbtQVrn1HD+swxALhwfrlRB95xQkSrn7xCO6rER4kNdP4\n5pefhG6CCQdY88byTAhDWgFXWetZa/mv1gpsryuDXNdoxovt7/iqgsf7Umcn0Xs8\n3He+jR2Dcy5cpqyb26w1DEDDclw4sDnK5mrO+lig6/ZQixP5Pl4tUqnDazdLZCRn\nVdsGzFw397YxdJA79LLyuW58uGE3/ywcYwU3/4EMVZ/bXqXNzf8/zfkfa+6r8s7n\nI2nXpZwrlX1auj/cJwH8cSw0l0+Esnjqh88mcd5CpwKBgQDYEH1IEVUT9D1dms82\nwpQuehW+idYYbBqgVWGTt+j/7V5gTvVaTehP85DaIFIoy/oe1bQPgQNhGRp2QD1F\nnMV3w0LQt3HYRneVo0r2nuMX72WIJadrk5/k0nomCZgG4ulxMRcig1V9O2HeeVFC\ntaubzroQNjmBQrY0lJkCp+mZRwKBgQC2c3eWCX6W0+dmmith4n+A5pz5DoVWSH6P\nYF5fZUffBFnQmHbfiYtzj4/qCKinRC/AVk5K1WnG8+BHqYAjNzhaKvnFNxrg51FK\nPz9bswPM5yUkXgvj981dXADZ3wGPKY1x0L4xPJzjs4EPmZr9ZLeifQ4vEnMB7Lh0\n1B1saGM0jwKBgCgfV8RsQ4pDDqo1N0mJ9I506VjKq9E5MfCYKliODFyKLb5gqzsr\nwHooVrvKyLb+ueHD+X3vjTsYuEtBPp+QrzLANcYgaqmo3EgTXLZTZwRo1kfkBiT5\n8vVBCKHLokmVFZiJbyxfix6ISnJPwQFMTyPNzct45lDUnJVDCu7tU3m9AoGAS+gq\nPq/gjNvIkDVgCy9yoKxRboUOEGHE1d3gJYw7pJtoypJEEqhk7kUyOMo1cLG7tCe0\nFwpHIdDg5K+ucfhNZ6YtmFFey2cxuNQrhfkqgZtBJqpCBCxaspbOe9Z+DZPaFxoj\nptRy6YELFvRvOTEn/WBOAGOKmahk7aY6P5oGfB0CgYBKP+3MedDNeqFezPirlvaJ\nQk35sJBP8fxGCeofgoDZxJ2MoLkdvmu85EsDbMHxyEFK5UZEopDzbremqBeA3MqC\nr0NcLE2DyOjGn0LHjI33hs9Q7kpVfSVUPaxDW89+LubhTBF5JyhBN8CLEmVmIrAq\nv9adJ3vb4WOVax7p4ryA6Q==\n-----END PRIVATE KEY-----\n",
+  "client_email": "cmus-logger@cryptobox-188614.iam.gserviceaccount.com",
+  "client_id": "115620348239409837673",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://accounts.google.com/o/oauth2/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/cmus-logger%40cryptobox-188614.iam.gserviceaccount.com"
+}

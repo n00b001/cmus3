@@ -1,14 +1,20 @@
 package com.yachtmafia.util;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+
+import static com.yachtmafia.util.LoggerMaker.logError;
 
 /**
  * Created by xfant on 2018-01-20.
  */
 public class Util {
-    private static final Logger LOG = Logger.getLogger(Util.class.getSimpleName());
+//    private static final Logger LOG = Logger.getLogger(Util.class.getSimpleName());
+
+//    private final static Logger LOG = LoggerFactory.getLogger(Util.class);
     private static final int PRECISION = 20;
 
     private Util() {
@@ -41,7 +47,7 @@ public class Util {
             case "ETH":
                 return BigDecimal.valueOf(1000000000000000000L);
             default:
-                LOG.fatal("UNKNOWN CURRENCY: " + currency);
+                logError(Util.class, "UNKNOWN CURRENCY: " + currency);
                 throw new RuntimeException("UNKNOWN CURRENCY: " + currency);
         }
     }

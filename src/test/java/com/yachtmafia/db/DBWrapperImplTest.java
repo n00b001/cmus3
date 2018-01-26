@@ -34,7 +34,7 @@ public class DBWrapperImplTest {
         assert success;
     }
 
-    @Test @Ignore
+    @Test
     public void addPortfolioBalance() throws Exception {
         String purchasedAmount = String.valueOf(100000000);// 1btc;
         ConsumerRecord<String, String> consumerRecord = getDepositMessages(1).get(0);

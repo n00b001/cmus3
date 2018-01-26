@@ -2,17 +2,22 @@ package com.yachtmafia.db;
 
 import com.yachtmafia.config.Config;
 import com.yachtmafia.messages.SwapMessage;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.*;
 
+import static com.yachtmafia.util.LoggerMaker.logError;
+import static com.yachtmafia.util.LoggerMaker.logInfo;
+import static com.yachtmafia.util.LoggerMaker.logWarning;
 import static com.yachtmafia.util.Util.getCoinDoubleValue;
 
 
 public class DBWrapperImpl implements DBWrapper {
-    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
+//    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
+
     private Config config;
     public DBWrapperImpl(Config config) {
         try {
@@ -35,7 +40,7 @@ public class DBWrapperImpl implements DBWrapper {
                         "    "+config.SYMBOL+" = '" + coin + "'";
         String currencyID = getSingleQueryString(query);
         if (currencyID == null) {
-            LOG.error("Currency not found: " + coin);
+            logError(getClass(), "Currency not found: " + coin);
             return false;
         }
 
@@ -48,7 +53,7 @@ public class DBWrapperImpl implements DBWrapper {
                         "    "+config.EMAIL+" = '" + user + "'";
         String userId = getSingleQueryString(query);
         if (userId == null) {
-            LOG.error("User not found: " + user);
+            logError(getClass(), "User not found: " + user);
             return false;
         }
 
@@ -66,7 +71,7 @@ public class DBWrapperImpl implements DBWrapper {
                             + " = " + userWallet + " AND " + config.PRIVATE_KEY + " is not null";
             String userPrivatekey = getSingleQueryString(query);
             if (userPrivatekey != null){
-                LOG.info("User already has wallet!");
+                logInfo(getClass(), "User already has wallet!");
                 return true;
             }else{
                 /**
@@ -98,12 +103,12 @@ public class DBWrapperImpl implements DBWrapper {
                         walletId = String.valueOf(generatedKeys.getLong(1));
                     }
                     else {
-                        LOG.error("Failed to add wallet");
+                        logError(getClass(), "Failed to add wallet");
                         return false;
                     }
                 }
             } catch (SQLException e) {
-                LOG.error("Caught: ", e);
+                logError(getClass(), "Caught: ", e);
                 return false;
             }
 
@@ -126,7 +131,7 @@ public class DBWrapperImpl implements DBWrapper {
         ) {
             stmt.executeUpdate(query);
         } catch (SQLException e) {
-            LOG.error("Caught: ", e);
+            logError(getClass(), "Caught: ", e);
             return false;
         }
         return true;
@@ -178,7 +183,7 @@ public class DBWrapperImpl implements DBWrapper {
         ) {
             stmt.executeUpdate(query);
         } catch (SQLException e) {
-            LOG.error("Caught: ", e);
+            logError(getClass(), "Caught: ", e);
             success = false;
         }
         return success;
@@ -214,7 +219,7 @@ public class DBWrapperImpl implements DBWrapper {
         String toFunds = getSingleQueryString(query);
 
         if (toFunds == null){
-            LOG.warn(String.format("No to funds found for user: %s and coin: %s", user, coin));
+            logWarning(getClass(), String.format("No to funds found for user: %s and coin: %s", user, coin));
             return null;
         }
 
@@ -230,7 +235,7 @@ public class DBWrapperImpl implements DBWrapper {
         String fromFunds = getSingleQueryString(query);
 
         if (fromFunds == null){
-            LOG.warn(String.format("No from funds found for user: %s and coin: %s", user, coin));
+            logWarning(getClass(), String.format("No from funds found for user: %s and coin: %s", user, coin));
             return null;
         }
 
@@ -280,14 +285,14 @@ public class DBWrapperImpl implements DBWrapper {
             if (rs.next()) {
                 String string = rs.getString(1);
                 if (rs.next()) {
-                    LOG.error("More than one element was found for query: " + query);
+                    logError(getClass(), "More than one element was found for query: " + query);
                 }
                 return string;
             } else {
                 return null;
             }
         } catch (SQLException e) {
-            LOG.error("Caught: ", e);
+            logError(getClass(), "Caught: ", e);
         }
         return null;
     }

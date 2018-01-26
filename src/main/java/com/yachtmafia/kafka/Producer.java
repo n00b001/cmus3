@@ -3,21 +3,27 @@ package com.yachtmafia.kafka;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
+import static com.yachtmafia.util.LoggerMaker.logError;
+import static com.yachtmafia.util.LoggerMaker.logInfo;
+
 public class Producer implements Runnable{
 
-    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
+//    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
+
+//    private final Logger LOG = LoggerFactory.getLogger(getClass());
     //kafka Consumer object
     private KafkaProducer<String, String> producer;
     private volatile boolean running = true;
     private String topic;
 
     public void configure(Properties props){
-        LOG.info("Configuring producer...");
+        logInfo(getClass(), "Configuring producer...");
         producer = new KafkaProducer<>(props);
     }
 
@@ -26,13 +32,13 @@ public class Producer implements Runnable{
     }
 
     void stop() {
-        LOG.info("Stopping producer...");
+        logInfo(getClass(), "Stopping producer...");
         running = false;
     }
 
     @Override
     public void run() {
-        LOG.info("Starting producer...");
+        logInfo(getClass(), "Starting producer...");
         try {
             while (running && !Thread.currentThread().isInterrupted()) {
                 try {
@@ -47,12 +53,12 @@ public class Producer implements Runnable{
 
                     }
                 } catch (ExecutionException e) {
-                    LOG.error("Caught error: ", e);
+                    logError(getClass(), "Caught error: ", e);
                 }
             }
         }
         catch (InterruptedException ex){
-            LOG.error("Caught exception: ", ex);
+            logError(getClass(), "Caught exception: ", ex);
             Thread.currentThread().interrupt();
         }finally {
             producer.flush();
@@ -64,7 +70,7 @@ public class Producer implements Runnable{
         RecordMetadata metadata = producer.send(record).get();
 
         long elapsedTime = System.currentTimeMillis() - time;
-        LOG.info(String.format("sent record(key=%s value=%s) " +
+        logInfo(getClass(), String.format("sent record(key=%s value=%s) " +
                         "meta(partition=%d, offset=%d) time=%d\n",
                 record.key(), record.value(), metadata.partition(),
                 metadata.offset(), elapsedTime));

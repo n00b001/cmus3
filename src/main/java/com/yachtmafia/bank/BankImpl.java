@@ -1,22 +1,23 @@
 package com.yachtmafia.bank;
 
+import com.google.cloud.logging.Logging;
+import com.google.cloud.logging.LoggingOptions;
 import com.paypal.api.payments.*;
 import com.paypal.api.payments.Error;
 import com.paypal.base.rest.APIContext;
 import com.yachtmafia.config.Config;
 import com.yachtmafia.exchange.Exchange;
-import org.apache.log4j.Logger;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.yachtmafia.util.LoggerMaker.logError;
+import static com.yachtmafia.util.LoggerMaker.logInfo;
 import static com.yachtmafia.util.Util.getCoinDoubleValue;
-import static com.yachtmafia.util.Util.getUnitsPerCoin;
 
 public class BankImpl implements Bank {
-    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
+//    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
     private final Config config;
 
     public BankImpl(Config config) {
@@ -65,13 +66,13 @@ public class BankImpl implements Bank {
             PayoutBatch response = Payout.get(context, payoutBatchId);
             while("PENDING".equals(response.getBatchHeader().getBatchStatus())){
                 Thread.sleep(2000);
-                LOG.info("Waiting for pending payment...");
+                logInfo(getClass(), "Waiting for pending payment...");
                 response = Payout.get(context, payoutBatchId);
             }
 
             while("PROCESSING".equals(response.getBatchHeader().getBatchStatus())){
                 Thread.sleep(20000);
-                LOG.info("Waiting for payment to process...");
+                logInfo(getClass(), "Waiting for payment to process...");
                 response = Payout.get(context, payoutBatchId);
             }
 
@@ -79,14 +80,14 @@ public class BankImpl implements Bank {
             printErrors(response);
 
             if (!"SUCCESS".equals(response.getBatchHeader().getBatchStatus())){
-                LOG.error(String.format("Did not successfully submit payment! currency: %s, amount: %s, user: %s",
+                logError(getClass(), String.format("Did not successfully submit payment! currency: %s, amount: %s, user: %s",
                         currency, amount, user));
                 return false;
             }
             return true;
         } catch (Exception e) {
             // Handle errors
-            LOG.error("Error: ", e);
+            logError(getClass(), "Error: ", e);
             return false;
         }
     }
@@ -97,11 +98,11 @@ public class BankImpl implements Bank {
             for (PayoutItemDetails item : payoutBatchItems) {
                 Error errors = item.getErrors();
                 if (errors != null) {
-                    LOG.error("Caught errors: ");
+                    logError(getClass(), "Caught errors: ");
                     List<ErrorDetails> details = errors.getDetails();
                     for (ErrorDetails det : details) {
                         String issue = det.getIssue();
-                        LOG.error(issue);
+                        logError(getClass(), issue);
                     }
                 }
             }
