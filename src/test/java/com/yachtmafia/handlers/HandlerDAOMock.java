@@ -1,5 +1,6 @@
 package com.yachtmafia.handlers;
 
+import com.yachtmafia.WalletAppKitMock;
 import com.yachtmafia.bank.BankMock;
 import com.yachtmafia.db.DBWrapperMock;
 import com.yachtmafia.exchange.ExchangeMock;
@@ -10,6 +11,7 @@ import com.yachtmafia.walletwrapper.WalletWrapperMock;
  */
 class HandlerDAOMock extends HandlerDAO {
     HandlerDAOMock() {
-        super(new DBWrapperMock(), new BankMock(), new ExchangeMock(), new WalletWrapperMock());
+        super(new DBWrapperMock(), new BankMock(), new ExchangeMock(),
+                new WalletWrapperMock(new WalletAppKitMock()));
     }
 }

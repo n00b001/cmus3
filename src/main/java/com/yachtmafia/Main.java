@@ -11,9 +11,12 @@ import com.yachtmafia.handlers.*;
 import com.yachtmafia.kafka.Consumer;
 import com.yachtmafia.walletwrapper.WalletWrapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.bitcoinj.kits.WalletAppKit;
+import org.bitcoinj.params.MainNetParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -61,7 +64,10 @@ public class Main implements Thread.UncaughtExceptionHandler{
     }
 
     private void setupWalletWrapper() {
-        walletWrapper = new WalletWrapper();
+        File file = new File(".");
+        WalletAppKit walletAppKit = new WalletAppKit(MainNetParams.get(),
+                file, "");
+        walletWrapper = new WalletWrapper(walletAppKit);
     }
 
     private void setupConfig() {

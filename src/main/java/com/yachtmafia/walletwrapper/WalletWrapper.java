@@ -1,16 +1,11 @@
 package com.yachtmafia.walletwrapper;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import org.bitcoinj.core.Address;
-import org.bitcoinj.core.Coin;
-import org.bitcoinj.core.ECKey;
-import org.bitcoinj.core.Transaction;
+import org.bitcoinj.core.*;
 import org.bitcoinj.kits.WalletAppKit;
 import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.wallet.SendRequest;
 import org.bitcoinj.wallet.Wallet;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -27,13 +22,18 @@ public class WalletWrapper {
 
 //    private final Logger LOG = LoggerFactory.getLogger(getClass());
     private File file = new File(".");
-    private WalletAppKit walletAppKit = new WalletAppKit(MainNetParams.get(), file, "");
+    private WalletAppKit walletAppKit;// = new WalletAppKit(MainNetParams.get(), file, "");
+
+    public WalletWrapper(WalletAppKit walletAppKit) {
+        this.walletAppKit = walletAppKit;
+    }
 
     public void startAsync() {
         walletAppKit.startAsync();
     }
 
-    public boolean sendTransaction(String privateKey, String publicAddress, String depositAddress, String amountOfCoin) {
+    public boolean sendTransaction(String privateKey, String publicAddress, String depositAddress, String amountOfCoin,
+                                   NetworkParameters network) {
         try {
             /**
              * todo: test
@@ -41,9 +41,9 @@ public class WalletWrapper {
             ECKey ecKey = ECKey.fromPrivate(privateKey.getBytes());
             List<ECKey> ecKeyList = new ArrayList<>();
             ecKeyList.add(ecKey);
-            Wallet wallet = Wallet.fromKeys(MainNetParams.get(), ecKeyList);
+            Wallet wallet = Wallet.fromKeys(network, ecKeyList);
 
-            Address address = Address.fromBase58(MainNetParams.get(), depositAddress);
+            Address address = Address.fromBase58(network, depositAddress);
 
             Long satoshis = Long.valueOf(amountOfCoin);
             final Coin value = Coin.valueOf(satoshis);

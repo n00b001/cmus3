@@ -1,5 +1,6 @@
 package com.yachtmafia.cryptoKeyPairs;
 
+import org.bitcoinj.params.UnitTestParams;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -9,7 +10,7 @@ public class BTCTest {
 
     @Before
     public void setup(){
-        btc = new BTC();
+        btc = new BTC(UnitTestParams.get());
     }
 
     @Test
@@ -27,7 +28,7 @@ public class BTCTest {
     @Test
     public void uniqueAddresses(){
         for (int i=0; i<NUM_OF_TESTS; i++){
-            BTC btc1 = new BTC();
+            BTC btc1 = new BTC(UnitTestParams.get());
             assert !btc1.getPublicAddress().equals(btc.getPublicAddress());
             assert !btc1.getPrivateKey().equals(btc.getPrivateKey());
         }

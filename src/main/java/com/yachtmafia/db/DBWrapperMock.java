@@ -2,11 +2,12 @@ package com.yachtmafia.db;
 
 import com.yachtmafia.cryptoKeyPairs.BTC;
 import com.yachtmafia.messages.SwapMessage;
+import org.bitcoinj.params.UnitTestParams;
 
 import java.math.BigDecimal;
 
 public class DBWrapperMock implements DBWrapper {
-    private BTC btc = new BTC();
+    private BTC btc = new BTC(UnitTestParams.get());
 
     @Override
     public String getPublicAddress(String user, String coin) {

@@ -5,14 +5,13 @@ import com.yachtmafia.cryptoKeyPairs.CryptoKeyPair;
 import com.yachtmafia.cryptoKeyPairs.CryptoKeyPairGenerator;
 import com.yachtmafia.messages.SwapMessage;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.bitcoinj.params.UnitTestParams;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.math.BigDecimal;
 
 import static com.yachtmafia.util.KafkaMessageGenerator.getDepositMessages;
-import static org.junit.Assert.*;
 
 /**
  * Created by xfant on 2018-01-14.
@@ -29,7 +28,7 @@ public class DBWrapperImplTest {
     public void addNewWallet() throws Exception {
         String user = "MarkRobins@gmail.com";
         String coin = "BTC";
-        CryptoKeyPair keyPair = CryptoKeyPairGenerator.parse(coin);
+        CryptoKeyPair keyPair = CryptoKeyPairGenerator.parse(coin, UnitTestParams.get());
         boolean success = dbWrapper.addNewWallet(user, coin, keyPair.getPublicAddress(), keyPair.getPrivateKey());
         assert success;
     }

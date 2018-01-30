@@ -1,6 +1,7 @@
 package com.yachtmafia.exchange;
 
 import com.yachtmafia.cryptoKeyPairs.BTC;
+import org.bitcoinj.params.UnitTestParams;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -18,7 +19,7 @@ public class ExchangeMock implements Exchange {
 
     @Override
     public String getDepositAddress(String fromCoinName) {
-        return new BTC().getPublicAddress();
+        return new BTC(UnitTestParams.get()).getPublicAddress();
     }
 
     @Override

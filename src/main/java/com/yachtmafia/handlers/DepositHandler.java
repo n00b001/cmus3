@@ -4,8 +4,7 @@ import com.yachtmafia.cryptoKeyPairs.CryptoKeyPair;
 import com.yachtmafia.cryptoKeyPairs.CryptoKeyPairGenerator;
 import com.yachtmafia.messages.SwapMessage;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.bitcoinj.params.MainNetParams;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -46,7 +45,8 @@ public class DepositHandler implements MessageHandler {
                     swapMessage.getToCoinName());
             if (publicAddress == null){
                 try {
-                    CryptoKeyPair keyPair = CryptoKeyPairGenerator.parse(swapMessage.getToCoinName());
+                    CryptoKeyPair keyPair = CryptoKeyPairGenerator.parse(swapMessage.getToCoinName(),
+                            MainNetParams.get());
                     boolean success = handlerDAO.getDbWrapper().addNewWallet(swapMessage.getUsername(),
                             swapMessage.getToCoinName(),
                             keyPair.getPublicAddress(), keyPair.getPrivateKey());
