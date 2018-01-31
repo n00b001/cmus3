@@ -5,6 +5,8 @@ import com.coinbase.api.CoinbaseBuilder;
 import com.coinbase.api.exception.CoinbaseException;
 import com.yachtmafia.config.Config;
 //import org.apache.log4j.Logger;
+import org.joda.money.CurrencyUnit;
+import org.joda.money.Money;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -14,6 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static com.yachtmafia.util.LoggerMaker.logError;
+import static com.yachtmafia.util.LoggerMaker.logWarning;
 
 /**
  * Created by xfant on 2018-01-20.
@@ -69,8 +72,48 @@ public class ExchangeCoinbase implements Exchange {
 
     @Override
     public String getLowestPrice(String symbolPair) {
-        String returnString = "";
-        throw new NotImplementedException();
+        if (symbolPair == null){
+            logError(getClass(), "symbolPair == null ");
+        }else if (!symbolPair.contains("BTC")){
+            logError(getClass(), "Currency not supported: " + symbolPair);
+        }else{
+            try {
+                String currency = symbolPair.replace("BTC", "");
+                Money spotPrice = cb.getSpotPrice(CurrencyUnit.getInstance(currency));
+                return spotPrice.getAmount().toPlainString();
+            }catch (IOException| CoinbaseException ex){
+                logError(getClass(), "Caught error: ", ex);
+            }
+        }
+        return null;
+//
+//        try {
+//            switch (symbolPair) {
+//                case "BTCGBP":
+//                case "GBPBTC": {
+//                    Money spotPrice = cb.getSpotPrice(CurrencyUnit.GBP);
+//                    return spotPrice.getAmount().toPlainString();
+//                }
+////                    break;
+//                case "BTCEUR":
+//                case "EURBTC": {
+//                    Money spotPrice = cb.getSpotPrice(CurrencyUnit.EUR);
+//                    return spotPrice.getAmount().toPlainString();
+//                }
+//                case "BTCUSD":
+//                case "USDBTC": {
+//                    Money spotPrice = cb.getSpotPrice(CurrencyUnit.USD);
+//                    return spotPrice.getAmount().toPlainString();
+//                }
+//                default:
+//                    logWarning(getClass(), "Symbol pair not supported: " + symbolPair);
+//            }
+//        }catch (IOException| CoinbaseException ex){
+//            logError(getClass(), "Caught error: ", ex);
+//        }
+//        return null;
+//        String returnString = "";
+//        throw new NotImplementedException();
 //        try {
 ////            cb.getOrders()
 //        } catch (CoinbaseException| IOException e) {
@@ -81,6 +124,19 @@ public class ExchangeCoinbase implements Exchange {
 
     @Override
     public String getHighestPrice(String symbolPair) {
+        if (symbolPair == null){
+            logError(getClass(), "symbolPair == null ");
+        }else if (!symbolPair.contains("BTC")){
+            logError(getClass(), "Currency not supported: " + symbolPair);
+        }else{
+            try {
+                String currency = symbolPair.replace("BTC", "");
+                Money spotPrice = cb.getSpotPrice(CurrencyUnit.getInstance(currency));
+                return spotPrice.getAmount().toPlainString();
+            }catch (IOException| CoinbaseException ex){
+                logError(getClass(), "Caught error: ", ex);
+            }
+        }
         return null;
     }
 }

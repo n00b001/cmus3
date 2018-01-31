@@ -25,22 +25,46 @@ public class ExchangeWrapper implements Exchange {
 
     @Override
     public String exchangeCurrency(String from, String to, String amount) {
-        throw new NotImplementedException();
+        for (Exchange exchange : exchanges) {
+            String purchaseAmount = exchange.exchangeCurrency(from, to, amount);
+            if (purchaseAmount != null){
+                return purchaseAmount;
+            }
+        }
+        return null;
     }
 
     @Override
     public boolean withdrawCrypto(String coinName, String address, String amount) {
-        throw new NotImplementedException();
+        for (Exchange exchange : exchanges) {
+            boolean success = exchange.withdrawCrypto(coinName, address, amount);
+            if (success){
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public String getDepositAddress(String fromCoinName) {
-        throw new NotImplementedException();
+        for (Exchange exchange : exchanges) {
+            String depositAddress = exchange.getDepositAddress(fromCoinName);
+            if (depositAddress != null){
+                return depositAddress;
+            }
+        }
+        return null;
     }
 
     @Override
     public boolean withdrawToBank(String toCoinName, String purchasedAmount) {
-        throw new NotImplementedException();
+        for (Exchange exchange : exchanges) {
+            boolean success = exchange.withdrawToBank(toCoinName, purchasedAmount);
+            if (success){
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
