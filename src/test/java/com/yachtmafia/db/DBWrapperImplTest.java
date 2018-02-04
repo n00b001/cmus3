@@ -12,6 +12,7 @@ import org.junit.Test;
 import java.math.BigDecimal;
 
 import static com.yachtmafia.util.KafkaMessageGenerator.getDepositMessages;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Created by xfant on 2018-01-14.
@@ -31,15 +32,20 @@ public class DBWrapperImplTest {
         CryptoKeyPair keyPair = CryptoKeyPairGenerator.parse(coin, UnitTestParams.get());
         boolean success = dbWrapper.addNewWallet(user, coin, keyPair.getPublicAddress(), keyPair.getPrivateKey());
         assert success;
+        assert dbWrapper.removeWallet(user, coin, keyPair.getPublicAddress());
     }
 
     @Test
     public void addPortfolioBalance() throws Exception {
         String purchasedAmount = String.valueOf(100000000);// 1btc;
-        ConsumerRecord<String, String> consumerRecord = getDepositMessages(1).get(0);
+        String id = "0";
+        ConsumerRecord<String, String> consumerRecord = getDepositMessages(id, 1).get(0);
         String recordString = consumerRecord.value();
         SwapMessage message = new SwapMessage(recordString);
+        String topic = "DEPOSIT";
+        assert dbWrapper.addTransaction(id, message, topic);
         boolean success = dbWrapper.addPortfolioBalance(message, purchasedAmount);
+        assert dbWrapper.removeTransaction(id);
         assert success;
     }
 
@@ -55,16 +61,25 @@ public class DBWrapperImplTest {
     public void getPrivateKey() throws Exception {
         String user = "MarkRobins@gmail.com";
         String coin = "BTC";
+        String publicAddress = "publicUnitTest";
+        String privateAddress = "privateUnitTest";
+        assert dbWrapper.addNewWallet(user, coin, publicAddress, privateAddress);
         String privateKey = dbWrapper.getPrivateKey(user, coin);
-        assert privateKey != null;
+        assertEquals(privateAddress, privateKey);
+        assert dbWrapper.removeWallet(user, coin, publicAddress);
     }
 
     @Test
     public void getPublicAddress() throws Exception {
-        String user = "MarkRobins@gmail.com";
+        String user = "RachelZimmer@gmail.com";
         String coin = "BTC";
+        String publicAddressExpected = "unitTestPublic";
+        boolean success = dbWrapper.addNewWallet(user, coin, publicAddressExpected, "unitTestPrivate");
+        assert success;
         String publicAddress = dbWrapper.getPublicAddress(user, coin);
-        assert publicAddress != null;
+        assertEquals(publicAddressExpected, publicAddress);
+        success = dbWrapper.removeWallet(user, coin, publicAddressExpected);
+        assert success;
     }
 
 }

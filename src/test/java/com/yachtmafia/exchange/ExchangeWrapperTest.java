@@ -10,7 +10,6 @@ import java.util.Set;
 /**
  * Created by xfant on 2018-01-14.
  */
-@Ignore
 public class ExchangeWrapperTest {
     ExchangeWrapper exchangeWrapper;
     @Before

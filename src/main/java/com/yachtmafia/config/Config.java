@@ -21,7 +21,7 @@ public class Config {
     public String USERS_TABLE = "users";
     public String WALLETS_TABLE = "wallets";
     public String PRIVATE_TABLE = "privatekeys";
-    public String PORTFOLIO_TABLE = "transactions";
+    public String TRANSACTION_TABLE = "transactions";
     public String JOBS_TABLE = "jobs";
 
     public String PUBLIC_ADDRESS = "public_address";
@@ -30,10 +30,15 @@ public class Config {
     public String USER_ID = "user_id";
     public String WALLET_ID = "wallet_id";
     public String ID = "id";
-    public String SYMBOL = "symbol";
+//    public String SYMBOL = "symbol";
     public String EMAIL = "email";
     public String FROM_CURRENCY_ID = "from_currency_id";
     public String TO_CURRENCY_ID = "to_currency_id";
+    public String TO_AMOUNT = "to_amount";
+    public String FROM_AMOUNT = "from_amount";
+    public String EXCHANGE_RATE = "exchange_rate";
+    public String TOPIC = "topic";
+    public String KAFKA_MESSAGE = "kafka_message";
 
     public String CLIENT_ID_PAYPAL = "AbTewYvrX2Ts8bDNai80TeybnI8G9qKoPsUQoZN8Qs0fMvZZJsgCRBeRyIduGsuYLZ-sbgj47ZNeNFeV";
     public String CLIENT_SECRET_PAYPAL = "EBT3S1kHYZVH6Um_VlIfRRTEKTc86WzUniKvac770EL6J1T2ig77X2VrLWpfx4tBBBNwkQoCGXFhpjcK";

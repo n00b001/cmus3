@@ -41,12 +41,12 @@ public class WithdrawHandler implements MessageHandler {
     public Boolean call() throws Exception {
         if (TOPIC_NAME.equals(message.topic())) {
             SwapMessage swapMessage = new SwapMessage(message.value());
-            logInfo(getClass(), "swapMessage: " + swapMessage);
+            logInfo(this, "swapMessage: " + swapMessage);
 
             String publicAddress = handlerDAO.getDbWrapper().getPublicAddress(swapMessage.getUsername(),
                     swapMessage.getFromCoinName());
             if (publicAddress == null) {
-                logError(getClass(), String.format("User: %s%nDoes not have wallet for coin: %s",
+                logError(this, String.format("User: %s%nDoes not have wallet for coin: %s",
                         swapMessage.getUsername(), swapMessage.getFromCoinName()));
                 return true;
             }
@@ -54,7 +54,7 @@ public class WithdrawHandler implements MessageHandler {
             String privateKey = handlerDAO.getDbWrapper().getPrivateKey(swapMessage.getUsername(),
                     swapMessage.getFromCoinName());
             if (privateKey == null) {
-                logError(getClass(), String.format("User: %s%nDoes not have private key for coin: %s",
+                logError(this, String.format("User: %s%nDoes not have private key for coin: %s",
                         swapMessage.getUsername(), swapMessage.getFromCoinName()));
                 return true;
             }
@@ -63,7 +63,7 @@ public class WithdrawHandler implements MessageHandler {
                     handlerDAO.getExchange().getDepositAddress(swapMessage.getFromCoinName()),
                     swapMessage.getAmountOfCoin(), MainNetParams.get());
             if (!success) {
-                logError(getClass(), "Error handing wallet to exchange transaction for: " + swapMessage.toString());
+                logError(this, "Error handing wallet to exchange transaction for: " + swapMessage.toString());
                 return false;
             }
 
@@ -72,21 +72,21 @@ public class WithdrawHandler implements MessageHandler {
                     swapMessage.getAmountOfCoin());
             success = handlerDAO.getExchange().withdrawToBank(swapMessage.getToCoinName(), purchasedAmount);
             if (!success) {
-                logError(getClass(), "Error withdrawing from exchange to bank with message: " + swapMessage.toString()
+                logError(this, "Error withdrawing from exchange to bank with message: " + swapMessage.toString()
                         + " for amount: " + purchasedAmount);
             }
 
             success = handlerDAO.getBank().payUser(swapMessage.getToCoinName(), purchasedAmount,
                     swapMessage.getUsername());
             if (!success) {
-                logError(getClass(), "Error when transfering from bank to user: " + swapMessage.toString() + " for amnount: "
+                logError(this, "Error when transfering from bank to user: " + swapMessage.toString() + " for amnount: "
                         + purchasedAmount);
                 return false;
             }
 
             success = handlerDAO.getDbWrapper().addPortfolioBalance(swapMessage, purchasedAmount);
             if (!success) {
-                logError(getClass(), "Error when inserting portfoliobalance: " + swapMessage.toString() + " for amnount: "
+                logError(this, "Error when inserting portfoliobalance: " + swapMessage.toString() + " for amnount: "
                         + purchasedAmount);
                 return false;
             }

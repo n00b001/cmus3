@@ -27,7 +27,7 @@ public class Consumer implements Runnable{
     private List<MessageHandler> listeners;
 
     public Consumer(Properties props, List<MessageHandler> listeners){
-        logInfo(getClass(), "Configuring Consumer...");
+        logInfo(this, "Configuring Consumer...");
         this.listeners = listeners;
         consumer = new KafkaConsumer<>(props);
     }
@@ -35,18 +35,18 @@ public class Consumer implements Runnable{
     public void subscribe(List<String> topics){
         //subscribe to topic
 
-        logInfo(getClass(), String.format("Subscribing to: %s", topics.toString()));
+        logInfo(this, String.format("Subscribing to: %s", topics.toString()));
         consumer.subscribe(topics);
     }
 
     public void stop(){
-        logInfo(getClass(), "Stopping Consumer...");
+        logInfo(this, "Stopping Consumer...");
         running = false;
     }
 
     @Override
     public void run() {
-        logInfo(getClass(), "Starting Consumer...");
+        logInfo(this, "Starting Consumer...");
         while (running && !Thread.currentThread().isInterrupted()) {
             try {
                 ConsumerRecords<String, String> records = consumer.poll(0);
@@ -65,7 +65,7 @@ public class Consumer implements Runnable{
                 running = false;
                 Thread.currentThread().interrupt();
             }catch (Exception e) {
-                logError(getClass(), "Caught exception: ", e);
+                logError(this, "Caught exception: ", e);
             }
         }
 
@@ -77,7 +77,7 @@ public class Consumer implements Runnable{
             Future<Boolean> future = handler.run(record);
             set.add(future);
         } catch (Exception e) {
-            logError(getClass(), "Caught exception: ", e);
+            logError(this, "Caught exception: ", e);
             consumer.commitAsync();
         }
     }
@@ -88,9 +88,9 @@ public class Consumer implements Runnable{
              * Do nothing
              */
         } else if (!success) {
-            logError(getClass(), "Could not process: ");
+            logError(this, "Could not process: ");
             for (ConsumerRecord<String, String> msg : records) {
-                logError(getClass(), msg.value());
+                logError(this, msg.value());
             }
         } else {
             consumer.commitSync();

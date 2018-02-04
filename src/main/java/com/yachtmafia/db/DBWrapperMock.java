@@ -39,4 +39,19 @@ public class DBWrapperMock implements DBWrapper {
         }
         return null;
     }
+
+    @Override
+    public boolean removeWallet(String user, String coin, String address) {
+        return true;
+    }
+
+    @Override
+    public boolean addTransaction(String id, SwapMessage swapMessage, String topic) {
+        return true;
+    }
+
+    @Override
+    public boolean removeTransaction(String id) {
+        return true;
+    }
 }

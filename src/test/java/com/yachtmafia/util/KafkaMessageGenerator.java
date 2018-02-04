@@ -14,40 +14,50 @@ import java.util.concurrent.ExecutionException;
 import static com.yachtmafia.util.Const.*;
 
 public class KafkaMessageGenerator {
-    public static List<ConsumerRecord<String, String>> getDepositMessages(long amountOfMessage){
+    public static List<ConsumerRecord<String, String>> getDepositMessages(long amountOfMessage) {
+        return getDepositMessages("DEPOSIT", amountOfMessage);
+    }
+    public static List<ConsumerRecord<String, String>> getDepositMessages(String id, long amountOfMessage) {
         List<ConsumerRecord<String, String>> records = new ArrayList<>();
 
-        for (long i=0;i<amountOfMessage;i++) {
-            String value = "{'"+ SwapMessage.AMOUNT_OF_COIN_ATTRIB+"':'"+(i+1)+"', '"
-                    +SwapMessage.FROM_CURRENCY_NAME_ATTRIB+"':'GBP', '"
-                    +SwapMessage.TO_CURRENCY_NAME_ATTRIB+"':'BTC', '"+
-                    SwapMessage.USERNAME_ATTRIB + "':'MarkRobins@gmail.com'}";
+        for (long i = 0; i < amountOfMessage; i++) {
+            String value = "{'" + SwapMessage.AMOUNT_OF_COIN_ATTRIB + "':'" + (i + 1) + "', '"
+                    + SwapMessage.FROM_CURRENCY_NAME_ATTRIB + "':'GBP', '"
+                    + SwapMessage.TO_CURRENCY_NAME_ATTRIB + "':'BTC', '" +
+                    SwapMessage.USERNAME_ATTRIB + "':'MarkRobins@gmail.com', '" +
+                    SwapMessage.ID_ATTRIB + "':'" + id + "'}";
             records.add(new ConsumerRecord<>(DEPOSIT_TOPIC_NAME, 0, 0, null, value));
         }
         return records;
     }
 
-    public static List<ConsumerRecord<String, String>> getWithdrawMessages(long amountOfMessage){
+    public static List<ConsumerRecord<String, String>> getWithdrawMessages(long amountOfMessage) {
+        return getWithdrawMessages("WITHDRAW", amountOfMessage);
+    }
+
+    public static List<ConsumerRecord<String, String>> getWithdrawMessages(String id, long amountOfMessage) {
         List<ConsumerRecord<String, String>> records = new ArrayList<>();
 
         for (long i = 0; i < amountOfMessage * 1000; i += 1000) {
-            String value = "{'"+ SwapMessage.AMOUNT_OF_COIN_ATTRIB+"':'"+i+"', '"
-                    +SwapMessage.FROM_CURRENCY_NAME_ATTRIB+"':'BTC', '"
-                    +SwapMessage.TO_CURRENCY_NAME_ATTRIB+"':'GBP', '"+
-                    SwapMessage.USERNAME_ATTRIB + "':'MarkRobins@gmail.com'}";
+            String value = "{'" + SwapMessage.AMOUNT_OF_COIN_ATTRIB + "':'" + i + "', '"
+                    + SwapMessage.FROM_CURRENCY_NAME_ATTRIB + "':'BTC', '"
+                    + SwapMessage.TO_CURRENCY_NAME_ATTRIB + "':'GBP', '" +
+                    SwapMessage.USERNAME_ATTRIB + "':'MarkRobins@gmail.com', '" +
+                    SwapMessage.ID_ATTRIB + "':'"+id+"'}";
             records.add(new ConsumerRecord<>(WITHDRAW_TOPIC_NAME, 0, 0, null, value));
         }
         return records;
     }
 
-    public static List<ConsumerRecord<String, String>> getSwapMessages(long amountOfMessage){
+    public static List<ConsumerRecord<String, String>> getSwapMessages(long amountOfMessage) {
         List<ConsumerRecord<String, String>> records = new ArrayList<>();
 
-        for (long i=0;i<amountOfMessage;i++) {
-            String value = "{'"+ SwapMessage.AMOUNT_OF_COIN_ATTRIB+"':'"+i+"', '"
-                    +SwapMessage.FROM_CURRENCY_NAME_ATTRIB+"':'BTC', '"
-                    +SwapMessage.TO_CURRENCY_NAME_ATTRIB+"':'ETH', '"+
-                    SwapMessage.USERNAME_ATTRIB + "':'MarkRobins@gmail.com'}";
+        for (long i = 0; i < amountOfMessage; i++) {
+            String value = "{'" + SwapMessage.AMOUNT_OF_COIN_ATTRIB + "':'" + i + "', '"
+                    + SwapMessage.FROM_CURRENCY_NAME_ATTRIB + "':'BTC', '"
+                    + SwapMessage.TO_CURRENCY_NAME_ATTRIB + "':'ETH', '" +
+                    SwapMessage.USERNAME_ATTRIB + "':'MarkRobins@gmail.com', '" +
+                    SwapMessage.ID_ATTRIB + "':'0'}";
             records.add(new ConsumerRecord<>(SWAP_TOPIC_NAME, 0, 0, null, value));
         }
         return records;

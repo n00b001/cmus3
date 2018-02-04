@@ -39,7 +39,7 @@ public class SwapHandler implements MessageHandler {
     public Boolean call() throws Exception {
         if (TOPIC_NAME.equals(message.topic())){
             SwapMessage swapMessage = new SwapMessage(message.value());
-            logInfo(getClass(), "Swapmessage: " + swapMessage);
+            logInfo(this, "Swapmessage: " + swapMessage);
             throw new NotImplementedException();
         }
         return false;

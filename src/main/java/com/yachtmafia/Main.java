@@ -138,10 +138,10 @@ public class Main implements Thread.UncaughtExceptionHandler{
             }
         }
         catch (InterruptedException ex){
-            logError(getClass(), "Caught error! ", ex);
+            logError(this, "Caught error! ", ex);
             Thread.currentThread().interrupt();
         }
-        logInfo(getClass(), "Shutting down...");
+        logInfo(this, "Shutting down...");
         for(Thread t : threads){
             t.interrupt();
         }
@@ -195,6 +195,6 @@ public class Main implements Thread.UncaughtExceptionHandler{
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
-        logError(getClass(), String.format("Caught from thread: %s: ", t.toString()), e);
+        logError(this, String.format("Caught from thread: %s: ", t.toString()), e);
     }
 }

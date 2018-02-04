@@ -23,7 +23,7 @@ public class Producer implements Runnable{
     private String topic;
 
     public void configure(Properties props){
-        logInfo(getClass(), "Configuring producer...");
+        logInfo(this, "Configuring producer...");
         producer = new KafkaProducer<>(props);
     }
 
@@ -32,13 +32,13 @@ public class Producer implements Runnable{
     }
 
     void stop() {
-        logInfo(getClass(), "Stopping producer...");
+        logInfo(this, "Stopping producer...");
         running = false;
     }
 
     @Override
     public void run() {
-        logInfo(getClass(), "Starting producer...");
+        logInfo(this, "Starting producer...");
         try {
             while (running && !Thread.currentThread().isInterrupted()) {
                 try {
@@ -53,12 +53,12 @@ public class Producer implements Runnable{
 
                     }
                 } catch (ExecutionException e) {
-                    logError(getClass(), "Caught error: ", e);
+                    logError(this, "Caught error: ", e);
                 }
             }
         }
         catch (InterruptedException ex){
-            logError(getClass(), "Caught exception: ", ex);
+            logError(this, "Caught exception: ", ex);
             Thread.currentThread().interrupt();
         }finally {
             producer.flush();
@@ -70,7 +70,7 @@ public class Producer implements Runnable{
         RecordMetadata metadata = producer.send(record).get();
 
         long elapsedTime = System.currentTimeMillis() - time;
-        logInfo(getClass(), String.format("sent record(key=%s value=%s) " +
+        logInfo(this, String.format("sent record(key=%s value=%s) " +
                         "meta(partition=%d, offset=%d) time=%d\n",
                 record.key(), record.value(), metadata.partition(),
                 metadata.offset(), elapsedTime));

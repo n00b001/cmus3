@@ -65,7 +65,7 @@ public class ExchangeCoinbase implements Exchange {
             cb.getSupportedCurrencies().forEach(
                     a -> returnSet.add(a.getSymbol()));
         } catch (CoinbaseException| IOException e) {
-            logError(getClass(), "Caught: " + e);
+            logError(this, "Caught: " + e);
         }
         return returnSet;
     }
@@ -73,16 +73,16 @@ public class ExchangeCoinbase implements Exchange {
     @Override
     public String getLowestPrice(String symbolPair) {
         if (symbolPair == null){
-            logError(getClass(), "symbolPair == null ");
+            logError(this, "symbolPair == null ");
         }else if (!symbolPair.contains("BTC")){
-            logError(getClass(), "Currency not supported: " + symbolPair);
+            logError(this, "Currency not supported: " + symbolPair);
         }else{
             try {
                 String currency = symbolPair.replace("BTC", "");
                 Money spotPrice = cb.getSpotPrice(CurrencyUnit.getInstance(currency));
                 return spotPrice.getAmount().toPlainString();
             }catch (IOException| CoinbaseException ex){
-                logError(getClass(), "Caught error: ", ex);
+                logError(this, "Caught error: ", ex);
             }
         }
         return null;
@@ -125,16 +125,16 @@ public class ExchangeCoinbase implements Exchange {
     @Override
     public String getHighestPrice(String symbolPair) {
         if (symbolPair == null){
-            logError(getClass(), "symbolPair == null ");
+            logError(this, "symbolPair == null ");
         }else if (!symbolPair.contains("BTC")){
-            logError(getClass(), "Currency not supported: " + symbolPair);
+            logError(this, "Currency not supported: " + symbolPair);
         }else{
             try {
                 String currency = symbolPair.replace("BTC", "");
                 Money spotPrice = cb.getSpotPrice(CurrencyUnit.getInstance(currency));
                 return spotPrice.getAmount().toPlainString();
             }catch (IOException| CoinbaseException ex){
-                logError(getClass(), "Caught error: ", ex);
+                logError(this, "Caught error: ", ex);
             }
         }
         return null;

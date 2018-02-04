@@ -15,7 +15,7 @@ public class Util {
 //    private static final Logger LOG = Logger.getLogger(Util.class.getSimpleName());
 
 //    private final static Logger LOG = LoggerFactory.getLogger(Util.class);
-    private static final int PRECISION = 20;
+    public static final int PRECISION = 20;
 
     private Util() {
     }

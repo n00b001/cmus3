@@ -40,7 +40,7 @@ public class DepositHandler implements MessageHandler {
     public Boolean call() throws Exception {
         if (TOPIC_NAME.equals(message.topic())) {
             SwapMessage swapMessage = new SwapMessage(message.value());
-            logInfo(getClass(), "swapMessage: " + swapMessage.toString());
+            logInfo(this, "swapMessage: " + swapMessage.toString());
             String publicAddress = handlerDAO.getDbWrapper().getPublicAddress(swapMessage.getUsername(),
                     swapMessage.getToCoinName());
             if (publicAddress == null){
@@ -51,19 +51,19 @@ public class DepositHandler implements MessageHandler {
                             swapMessage.getToCoinName(),
                             keyPair.getPublicAddress(), keyPair.getPrivateKey());
                     if (!success) {
-                        logError(getClass(), "Did not add wallet successfully! "+ message);
+                        logError(this, "Did not add wallet successfully! "+ message);
                         return false;
                     }
                     publicAddress = keyPair.getPublicAddress();
                 }catch (Exception e){
-                    logError(getClass(), "Did not add wallet successfully! " + message.toString(), e);
+                    logError(this, "Did not add wallet successfully! " + message.toString(), e);
                     return false;
                 }
             }
             boolean success = handlerDAO.getBank().transferFromBankToExchange(swapMessage.getFromCoinName(),
                     swapMessage.getAmountOfCoin(), handlerDAO.getExchange());
             if (!success){
-                logError(getClass(), "Did not transfer balance from com.yachtmafia.bank to com.yachtmafia.exchange! "
+                logError(this, "Did not transfer balance from com.yachtmafia.bank to com.yachtmafia.exchange! "
                          + message);
                 return false;
             }
@@ -73,12 +73,12 @@ public class DepositHandler implements MessageHandler {
             success = handlerDAO.getExchange().withdrawCrypto(swapMessage.getToCoinName(), publicAddress,
                     purchasedAmount);
             if (!success){
-                logError(getClass(), "Did not withdraw coins! " + message);
+                logError(this, "Did not withdraw coins! " + message);
                 return false;
             }
             success = handlerDAO.getDbWrapper().addPortfolioBalance(swapMessage, purchasedAmount);
             if (!success){
-                logError(getClass(), "Did not add portfolio balance! " + message);
+                logError(this, "Did not add portfolio balance! " + message);
                 return false;
             }
             return true;

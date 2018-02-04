@@ -61,10 +61,10 @@ public class WalletWrapper {
 // Here, we just wait for it to finish, but we can also attach a listener that'll get run on a background
 // thread when finished. Or we could just assume the network accepts the transaction and carry on.
             Transaction transaction = future.get();
-            logInfo(getClass(), "Transaction: " + transaction);
+            logInfo(this, "Transaction: " + transaction);
             return true;
         } catch (Exception e) {
-            logError(getClass(), "CAUGHT", e);
+            logError(this, "CAUGHT", e);
             return false;
         }
     }

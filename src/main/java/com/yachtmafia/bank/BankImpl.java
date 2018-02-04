@@ -66,13 +66,13 @@ public class BankImpl implements Bank {
             PayoutBatch response = Payout.get(context, payoutBatchId);
             while("PENDING".equals(response.getBatchHeader().getBatchStatus())){
                 Thread.sleep(2000);
-                logInfo(getClass(), "Waiting for pending payment...");
+                logInfo(this, "Waiting for pending payment...");
                 response = Payout.get(context, payoutBatchId);
             }
 
             while("PROCESSING".equals(response.getBatchHeader().getBatchStatus())){
                 Thread.sleep(20000);
-                logInfo(getClass(), "Waiting for payment to process...");
+                logInfo(this, "Waiting for payment to process...");
                 response = Payout.get(context, payoutBatchId);
             }
 
@@ -80,14 +80,14 @@ public class BankImpl implements Bank {
             printErrors(response);
 
             if (!"SUCCESS".equals(response.getBatchHeader().getBatchStatus())){
-                logError(getClass(), String.format("Did not successfully submit payment! currency: %s, amount: %s, user: %s",
+                logError(this, String.format("Did not successfully submit payment! currency: %s, amount: %s, user: %s",
                         currency, amount, user));
                 return false;
             }
             return true;
         } catch (Exception e) {
             // Handle errors
-            logError(getClass(), "Error: ", e);
+            logError(this, "Error: ", e);
             return false;
         }
     }
@@ -98,11 +98,11 @@ public class BankImpl implements Bank {
             for (PayoutItemDetails item : payoutBatchItems) {
                 Error errors = item.getErrors();
                 if (errors != null) {
-                    logError(getClass(), "Caught errors: ");
+                    logError(this, "Caught errors: ");
                     List<ErrorDetails> details = errors.getDetails();
                     for (ErrorDetails det : details) {
                         String issue = det.getIssue();
-                        logError(getClass(), issue);
+                        logError(this, issue);
                     }
                 }
             }
