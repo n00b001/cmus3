@@ -49,7 +49,7 @@ public class Consumer implements Runnable{
         logInfo(this, "Starting Consumer...");
         while (running && !Thread.currentThread().isInterrupted()) {
             try {
-                ConsumerRecords<String, String> records = consumer.poll(0);
+                ConsumerRecords<String, String> records = consumer.poll(1000);
                 for (ConsumerRecord<String, String> record : records) {
                     for (MessageHandler handler : listeners) {
                         callListener(record, handler);
