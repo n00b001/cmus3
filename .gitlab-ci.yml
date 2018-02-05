@@ -48,7 +48,6 @@ deploy:
     - gcloud compute scp --zone europe-west2-a build/libs/cmus-1.0-SNAPSHOT-standalone.jar yachtmafia01@cmus-dev:/home/yachtmafia01/.
     - gcloud compute scp --zone europe-west2-a conf/cmus.service yachtmafia01@cmus-dev:/etc/systemd/system/.
     - gcloud compute ssh --zone europe-west2-a cmus-dev -- 'sudo systemctl daemon-reload'
-    - gcloud compute ssh --zone europe-west2-a cmus-dev -- 'sudo systemctl restart'
     - gcloud compute ssh --zone europe-west2-a cmus-dev -- 'sudo service cmus stop'
     - gcloud compute ssh --zone europe-west2-a cmus-dev -- 'sudo service cmus start'
   cache:
