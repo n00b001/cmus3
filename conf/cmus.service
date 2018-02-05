@@ -6,7 +6,7 @@ Requires=network-online.target
 [Service]
 #startup script
 Type=simple
-ExecStart=/usr/bin/java java -jar /home/yachtmafia01/cmus-1.0-SNAPSHOT-standalone.jar
+ExecStart=/usr/bin/java -jar /home/yachtmafia01/cmus-1.0-SNAPSHOT-standalone.jar
 
 #Timeout after 300 seconds
 TimeoutSec=300
