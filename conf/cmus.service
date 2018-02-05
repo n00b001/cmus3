@@ -1,0 +1,22 @@
+[Unit]
+Description=CMUS_Service
+After=network-online.target
+Requires=network-online.target
+
+[Service]
+#startup script
+Type=simple
+ExecStart=/usr/bin/java java -jar /home/yachtmafia01/cmus-1.0-SNAPSHOT-standalone.jar
+
+#Timeout after 300 seconds
+TimeoutSec=300
+
+#respawn
+Restart=on-failure
+
+#respawn limit 3 times every 600 seconds
+StartLimitBurst=3
+StartLimitInterval=10min
+
+[Install]
+WantedBy=multi-user.target graphical.target
