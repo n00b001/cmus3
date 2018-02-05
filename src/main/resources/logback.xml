@@ -5,10 +5,10 @@
             <level>INFO</level>
         </filter>
         <log>application.log</log> <!-- Optional : default java.log -->
-        <flushLevel>DEBUG</flushLevel> <!-- Optional : default ERROR -->
+        <flushLevel>WARN</flushLevel> <!-- Optional : default ERROR -->
     </appender>
 
-    <root level="debug">
+    <root level="warn">
         <appender-ref ref="CLOUD" />
     </root>
 </configuration>
