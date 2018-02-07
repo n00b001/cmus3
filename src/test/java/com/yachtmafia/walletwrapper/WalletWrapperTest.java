@@ -38,11 +38,12 @@ public class WalletWrapperTest {
         NetworkParameters unitTestParams = walletAppKit.params();
         CryptoKeyPair btc = CryptoKeyPairGenerator.parse("BTC", unitTestParams);
 
-        System.out.println(btc.getPublicAddress());
+        String publicAddress = btc.getPublicAddress();
+        System.out.println(publicAddress);
 
         Block genesisBlock = unitTestParams.getGenesisBlock();
         Block nextBlock = genesisBlock.createNextBlock(
-                Address.fromBase58(unitTestParams, btc.getPublicAddress()));
+                Address.fromBase58(unitTestParams, publicAddress));
         List<Transaction> transactionsNext = nextBlock.getTransactions();
         for (Transaction transaction : transactionsNext){
             List<TransactionOutput> outputs = transaction.getOutputs();
@@ -53,17 +54,19 @@ public class WalletWrapperTest {
             }
         }
 
+
         Wallet wallet = new Wallet(unitTestParams);
+//        wallet.set
         wallet.importKey(ECKey.fromPrivate(btc.getPrivateKey().getBytes()));
 
         CryptoKeyPair depositAddress = CryptoKeyPairGenerator.parse("BTC", unitTestParams);
 
         String privateKey = btc.getPrivateKey();
-        String publicAddress = btc.getPublicAddress();
         String despositAddress = depositAddress.getPublicAddress();
         String amountOfCoin = getUnitsPerCoin("BTC").toPlainString();
-        walletWrapper.sendTransaction(privateKey, publicAddress,
+        boolean success = walletWrapper.sendTransaction(privateKey, publicAddress,
                 despositAddress, amountOfCoin, unitTestParams);
+        assert success;
     }
 
 }
