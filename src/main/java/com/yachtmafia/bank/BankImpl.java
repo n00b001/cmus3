@@ -1,7 +1,5 @@
 package com.yachtmafia.bank;
 
-import com.google.cloud.logging.Logging;
-import com.google.cloud.logging.LoggingOptions;
 import com.paypal.api.payments.*;
 import com.paypal.api.payments.Error;
 import com.paypal.base.rest.APIContext;
@@ -31,8 +29,8 @@ public class BankImpl implements Bank {
 
     @Override
     public boolean payUser(String currency, String amount, String user) {
-        Currency paypalAmount = new Currency(currency,
-                String.valueOf(getCoinDoubleValue(amount, currency)));
+        String value = getCoinDoubleValue(amount, currency, 2).toPlainString();
+        Currency paypalAmount = new Currency(currency, value);
 
         PayoutItem payoutItem = new PayoutItem();
         payoutItem.setAmount(paypalAmount);
@@ -87,7 +85,7 @@ public class BankImpl implements Bank {
             return true;
         } catch (Exception e) {
             // Handle errors
-            logError(this, "Error: ", e);
+            logError(this, "Error: " + payout.toJSON(), e);
             return false;
         }
     }

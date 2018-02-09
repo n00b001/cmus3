@@ -2,13 +2,12 @@ package com.yachtmafia.exchange;
 
 import com.coinbase.api.Coinbase;
 import com.coinbase.api.CoinbaseBuilder;
+import com.coinbase.api.entity.Transfer;
 import com.coinbase.api.exception.CoinbaseException;
 import com.yachtmafia.config.Config;
 //import org.apache.log4j.Logger;
 import org.joda.money.CurrencyUnit;
 import org.joda.money.Money;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.IOException;
@@ -16,14 +15,15 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static com.yachtmafia.util.LoggerMaker.logError;
+import static com.yachtmafia.util.LoggerMaker.logInfo;
 import static com.yachtmafia.util.LoggerMaker.logWarning;
 
 /**
  * Created by xfant on 2018-01-20.
  */
 public class ExchangeCoinbase implements Exchange {
-    private Coinbase cb;
-    private Config config;
+    private final Coinbase cb;
+    private final Config config;
 //    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
 
 
@@ -34,13 +34,51 @@ public class ExchangeCoinbase implements Exchange {
 //                .build();
 
         cb = new CoinbaseBuilder()
-                .withAccessToken("4a9cb0ba78434e59c5371fb388f928db72e8cd407dd2f6590f6a47a3a672cd39")
+                .withAccessToken(config.COINBASE_ACCESS_TOKEN_LIVE)
                 .build();
     }
 
     @Override
     public String exchangeCurrency(String from, String to, String amount) {
-        throw new NotImplementedException();
+        try {
+            if ("BTC".equals(to) && "GBP".equals(from)) {
+                Money money = Money.ofMinor(CurrencyUnit.getInstance(from), Long.valueOf(amount));
+                Transfer buy = cb.buy(money);
+                handleStatus(buy);
+            } else if ("GBP".equals(to) && "BTC".equals(from)){
+                Money money = Money.ofMinor(CurrencyUnit.getInstance(from), Long.valueOf(amount));
+                Transfer buy = cb.sell(money);
+                handleStatus(buy);
+            }
+//            else{
+//                throw new RuntimeException("Un supported pair! to: "
+//                        + to + " from: " + from + " amount: " + amount);
+
+//            }
+        }catch (IOException|CoinbaseException|InterruptedException e){
+            logWarning(this, "Caught exception: ", e);
+        }
+//        throw new NotImplementedException();
+        return null;
+    }
+
+    private void handleStatus(Transfer buy) throws InterruptedException {
+        Transfer.Status status = buy.getStatus();
+        while(status.equals(Transfer.Status.CREATED)){
+            logInfo(this, "Transaction created...");
+            Thread.sleep(1000);
+            status = buy.getStatus();
+        }
+        while(status.equals(Transfer.Status.PENDING)){
+            logInfo(this, "Transaction pending...");
+            Thread.sleep(1000);
+            status = buy.getStatus();
+        }
+        if(Transfer.Status.COMPLETE.equals(status)){
+            logInfo(this, "Success!");
+        }else{
+            logError(this, "Failure!" + status.toString());
+        }
     }
 
     @Override

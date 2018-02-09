@@ -69,6 +69,9 @@ public class DepositHandler implements MessageHandler {
             }
             String purchasedAmount = handlerDAO.getExchange().exchangeCurrency(swapMessage.getFromCoinName(),
                     swapMessage.getToCoinName(), swapMessage.getAmountOfCoin());
+            if(purchasedAmount == null){
+                logError(this, "Failed to make purchase: " + message.toString());
+            }
 
             success = handlerDAO.getExchange().withdrawCrypto(swapMessage.getToCoinName(), publicAddress,
                     purchasedAmount);

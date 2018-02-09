@@ -45,6 +45,7 @@ public class Config {
 
     public String COINBASE_KEY = "k3d1JeBuZoqPXDNM";
     public String COINBASE_SECRET = "yoSgwEVgXVRRnfeW8OZe8QybYZXDg9RJ";
+    public String COINBASE_ACCESS_TOKEN_LIVE = "4a9cb0ba78434e59c5371fb388f928db72e8cd407dd2f6590f6a47a3a672cd39";
 
     public String KAFKA_ADDRESS = "35.197.252.186:9092";
 }

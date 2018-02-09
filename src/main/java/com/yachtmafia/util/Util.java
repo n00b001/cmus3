@@ -21,9 +21,13 @@ public class Util {
     }
 
     public static BigDecimal getCoinDoubleValue(String amount, String currencySymbol) {
+        return getCoinDoubleValue(amount, currencySymbol, PRECISION);
+    }
+
+    public static BigDecimal getCoinDoubleValue(String amount, String currencySymbol, int precision) {
         BigDecimal unitsPerCoin = getUnitsPerCoin(currencySymbol);
 
-        BigDecimal amountBigInt = BigDecimal .valueOf(Long.parseLong(amount));
+        BigDecimal amountBigInt = BigDecimal.valueOf(Long.parseLong(amount));
         RoundingMode roundingMode = RoundingMode.FLOOR;
         return amountBigInt.divide(unitsPerCoin, PRECISION, roundingMode);
     }

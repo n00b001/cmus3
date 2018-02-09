@@ -4,6 +4,10 @@ version '1.0-SNAPSHOT'
 apply plugin: 'java'
 apply plugin: 'gradle-one-jar'
 
+// gdax
+apply plugin: 'application'
+apply plugin: 'spring-boot'
+
 sourceCompatibility = 1.8
 
 buildscript {
@@ -13,10 +17,26 @@ buildscript {
     dependencies {
         classpath 'com.github.rholder:gradle-one-jar:1.0.4'
     }
+
+    //gdax
+    repositories {
+        mavenCentral()
+        maven { url "http://repo.maven.apache.org/maven2" }
+        maven { url "https://repo.spring.io/release" }
+
+    }
+    dependencies {
+        classpath "org.springframework.boot:spring-boot-gradle-plugin:1.5.4.RELEASE"
+    }
 }
 
 repositories {
     mavenCentral()
+
+    // gdax
+    maven { url "http://central.maven.org/maven2/"}
+    maven { url "http://repo1.maven.org/maven2/" }
+    maven { url "https://repo.spring.io/release/"}
 }
 
 dependencies {
@@ -37,6 +57,20 @@ dependencies {
 //    compile 'com.google.cloud:google-cloud-logging:1.14.0'
 //    compile 'com.google.cloud:google-cloud-logging-logback:0.33.0-alpha'
         compile 'com.google.cloud:google-cloud-logging:1.14.0'
+
+    // gdax
+    compile 'junit:junit:4.12'
+    compile 'com.google.code.gson:gson:2.8.0'
+    compile 'com.fasterxml.jackson.core:jackson-core:2.8.6'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.8.6'
+    compile 'com.fasterxml.jackson.core:jackson-annotations:2.8.6'
+    compile 'com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.8.6'
+    compile 'org.springframework.boot:spring-boot-starter-web:1.5.4.RELEASE'
+    compile 'org.springframework:spring-context:4.3.4.RELEASE'
+    compile 'joda-time:joda-time:2.9.7'
+
+    testCompile 'org.springframework:spring-test:4.3.5.RELEASE'
+    testCompile 'org.springframework.boot:spring-boot-test:1.5.4.RELEASE'
 }
 
 task buildFatJar(type: OneJar) {

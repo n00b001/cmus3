@@ -12,17 +12,17 @@ import org.junit.Test;
 public class BankImplTest {
     BankImpl bank;
 
-    @Test @Ignore
+    @Test
     public void payUser() throws Exception {
         bank = new BankImpl(new Config());
         String currency = "GBP";
         String amount = String.valueOf(100);
-        String user = "MarkRobins@gmail.com";
+        String user = "pamila@gmail.com";
         boolean success = bank.payUser(currency, amount, user);
         assert success;
     }
 
-    @Test @Ignore
+    @Test
     public void toExchange() throws Exception {
         bank = new BankImpl(new Config());
         Exchange exchange = new ExchangeMock();

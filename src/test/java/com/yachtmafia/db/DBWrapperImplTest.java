@@ -71,7 +71,7 @@ public class DBWrapperImplTest {
 
     @Test
     public void getPublicAddress() throws Exception {
-        String user = "RachelZimmer@gmail.com";
+        String user = "MarkRobins@gmail.com";
         String coin = "BTC";
         String publicAddressExpected = "unitTestPublic";
         boolean success = dbWrapper.addNewWallet(user, coin, publicAddressExpected, "unitTestPrivate");

@@ -10,7 +10,7 @@ import java.util.OptionalLong;
 import java.util.Set;
 
 public class ExchangeWrapper implements Exchange {
-    private Config config;
+    private final Config config;
     Set<Exchange> exchanges = new HashSet<>();
 //    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
 

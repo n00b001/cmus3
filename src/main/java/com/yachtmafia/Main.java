@@ -6,6 +6,8 @@ import com.yachtmafia.config.Config;
 import com.yachtmafia.db.DBWrapper;
 import com.yachtmafia.db.DBWrapperImpl;
 import com.yachtmafia.exchange.Exchange;
+import com.yachtmafia.exchange.ExchangeCoinbase;
+import com.yachtmafia.exchange.ExchangeGdax;
 import com.yachtmafia.exchange.ExchangeWrapper;
 import com.yachtmafia.handlers.*;
 import com.yachtmafia.kafka.Consumer;
@@ -39,7 +41,7 @@ public class Main implements Thread.UncaughtExceptionHandler{
     private volatile boolean running = true;
     private DBWrapper dbWrapper;
     private Bank bank;
-    private Exchange exchange;
+    private ExchangeWrapper exchange;
     private HandlerDAO handlerDAO;
     private Config config;
     private WalletWrapper walletWrapper;
@@ -76,6 +78,8 @@ public class Main implements Thread.UncaughtExceptionHandler{
 
     private void setupExchange() {
         exchange = new ExchangeWrapper(config);
+        exchange.addExchange(new ExchangeCoinbase(config));
+        exchange.addExchange(new ExchangeGdax(config));
     }
 
     private void setupBank() {
