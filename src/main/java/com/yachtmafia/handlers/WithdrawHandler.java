@@ -2,8 +2,6 @@ package com.yachtmafia.handlers;
 
 import com.yachtmafia.messages.SwapMessage;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.bitcoinj.params.MainNetParams;
-import org.bitcoinj.params.UnitTestParams;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
@@ -61,7 +59,7 @@ public class WithdrawHandler implements MessageHandler {
 
             boolean success = handlerDAO.getWalletWrapper().sendTransaction(privateKey, publicAddress,
                     handlerDAO.getExchange().getDepositAddress(swapMessage.getFromCoinName()),
-                    swapMessage.getAmountOfCoin(), MainNetParams.get());
+                    swapMessage.getAmountOfCoin(), handlerDAO.getNetwork());
             if (!success) {
                 logError(this, "Error handing wallet to exchange transaction for: " + swapMessage.toString());
                 return false;

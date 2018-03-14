@@ -1,10 +1,10 @@
 gdax:
   api:
-    baseUrl: "https://api.gdax.com/"
-  key: ""
-  secret: ""
-  passphrase: ""
-
+    baseUrl: "https://api-public.sandbox.gdax.com"
+#    baseUrl: "https://api.gdax.com/"
+  key: "d3b4ec3c5e2801abf0c7fb35afe9e3b3"
+  secret: "BTHgNJkcvJ41uEy0LoWWdl2M8VWydVCf1vubH2L68fynbHeg"
+  passphrase: "sandbox"
 websocket:
   baseUrl: "wss://ws-feed.gdax.com/"
 

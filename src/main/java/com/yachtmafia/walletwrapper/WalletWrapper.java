@@ -3,7 +3,6 @@ package com.yachtmafia.walletwrapper;
 import com.google.common.util.concurrent.ListenableFuture;
 import org.bitcoinj.core.*;
 import org.bitcoinj.kits.WalletAppKit;
-import org.bitcoinj.params.MainNetParams;
 import org.bitcoinj.wallet.SendRequest;
 import org.bitcoinj.wallet.Wallet;
 
@@ -21,7 +20,7 @@ public class WalletWrapper {
 //    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
 
 //    private final Logger LOG = LoggerFactory.getLogger(getClass());
-    private File file = new File(".");
+//    private File file = new File("wallet/.");
     private WalletAppKit walletAppKit;// = new WalletAppKit(MainNetParams.get(), file, "");
 
     public WalletWrapper(WalletAppKit walletAppKit) {
@@ -30,6 +29,10 @@ public class WalletWrapper {
 
     public void startAsync() {
         walletAppKit.startAsync();
+    }
+
+    public WalletAppKit getWalletAppKit() {
+        return walletAppKit;
     }
 
     public boolean sendTransaction(String privateKey, String publicAddress, String depositAddress, String amountOfCoin,
@@ -67,5 +70,9 @@ public class WalletWrapper {
             logError(this, "CAUGHT", e);
             return false;
         }
+    }
+
+    public Wallet getWallet(){
+        return walletAppKit.wallet();
     }
 }

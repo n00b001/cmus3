@@ -7,6 +7,7 @@ import com.yachtmafia.config.Config;
 import com.yachtmafia.exchange.Exchange;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +30,9 @@ public class BankImpl implements Bank {
 
     @Override
     public boolean payUser(String currency, String amount, String user) {
-        String value = getCoinDoubleValue(amount, currency, 2).toPlainString();
+        BigDecimal coinDoubleValue = getCoinDoubleValue(amount, currency, 2);
+        BigDecimal bigDecimal = coinDoubleValue.setScale(2, BigDecimal.ROUND_DOWN);
+        String value = bigDecimal.toPlainString();
         Currency paypalAmount = new Currency(currency, value);
 
         PayoutItem payoutItem = new PayoutItem();

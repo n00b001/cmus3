@@ -12,7 +12,7 @@ import static org.junit.Assert.*;
 /**
  * Created by xfant on 2018-01-20.
  */
-
+@Ignore
 public class ExchangeCoinbaseTest {
     ExchangeCoinbase exchangeCoinbase;
 

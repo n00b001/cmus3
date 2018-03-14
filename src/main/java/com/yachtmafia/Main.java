@@ -5,7 +5,6 @@ import com.yachtmafia.bank.BankImpl;
 import com.yachtmafia.config.Config;
 import com.yachtmafia.db.DBWrapper;
 import com.yachtmafia.db.DBWrapperImpl;
-import com.yachtmafia.exchange.Exchange;
 import com.yachtmafia.exchange.ExchangeCoinbase;
 import com.yachtmafia.exchange.ExchangeGdax;
 import com.yachtmafia.exchange.ExchangeWrapper;
@@ -13,10 +12,9 @@ import com.yachtmafia.handlers.*;
 import com.yachtmafia.kafka.Consumer;
 import com.yachtmafia.walletwrapper.WalletWrapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.kits.WalletAppKit;
 import org.bitcoinj.params.MainNetParams;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -45,6 +43,7 @@ public class Main implements Thread.UncaughtExceptionHandler{
     private HandlerDAO handlerDAO;
     private Config config;
     private WalletWrapper walletWrapper;
+    private NetworkParameters network = MainNetParams.get();
 
     public static void main(String[] args) {
 
@@ -66,9 +65,9 @@ public class Main implements Thread.UncaughtExceptionHandler{
     }
 
     private void setupWalletWrapper() {
-        File file = new File(".");
-        WalletAppKit walletAppKit = new WalletAppKit(MainNetParams.get(),
-                file, "");
+        File file = new File("wallet");
+        WalletAppKit walletAppKit = new WalletAppKit(handlerDAO.getNetwork(),
+                file, "forwarding-service-main");
         walletWrapper = new WalletWrapper(walletAppKit);
     }
 
@@ -98,6 +97,7 @@ public class Main implements Thread.UncaughtExceptionHandler{
 
     private void startAllThreads() {
         walletWrapper.startAsync();
+        walletWrapper.getWalletAppKit().peerGroup().startAsync();
         for (Thread t : threads){
             t.start();
         }
@@ -152,7 +152,7 @@ public class Main implements Thread.UncaughtExceptionHandler{
     }
 
     private void setupConsumers() {
-        handlerDAO = new HandlerDAO(dbWrapper, bank, exchange, walletWrapper);
+        handlerDAO = new HandlerDAO(dbWrapper, bank, exchange, walletWrapper, config, network);
 
         List<MessageHandler> depositListers = new ArrayList<>();
         ExecutorService handlerPool = Executors.newFixedThreadPool(3);

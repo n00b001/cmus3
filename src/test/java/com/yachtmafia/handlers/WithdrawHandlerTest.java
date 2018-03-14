@@ -1,6 +1,7 @@
 package com.yachtmafia.handlers;
 
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.bitcoinj.store.BlockStoreException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,7 +16,7 @@ public class WithdrawHandlerTest {
     private MessageHandler messageHandler;
 
     @Before
-    public void setup(){
+    public void setup() throws BlockStoreException {
         HandlerDAO handlerDAO = new HandlerDAOMock();
         ExecutorService handlerPool = Executors.newFixedThreadPool(3);
         messageHandler = new WithdrawHandler(handlerDAO, handlerPool);
