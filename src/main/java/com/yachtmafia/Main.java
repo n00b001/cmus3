@@ -48,7 +48,7 @@ public class Main implements Thread.UncaughtExceptionHandler{
 
     public static void main(String[] args) {
         LoggerContext context = (org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false);
-        File file = new File("src/main/resources/log4j2.xml");
+        File file = new File("src/main/resources/log4j.xml");
 
 // this will force a reconfiguration
         context.setConfigLocation(file.toURI());
