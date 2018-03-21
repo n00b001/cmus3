@@ -5,18 +5,20 @@ import com.paypal.api.payments.Error;
 import com.paypal.base.rest.APIContext;
 import com.yachtmafia.config.Config;
 import com.yachtmafia.exchange.Exchange;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.yachtmafia.util.LoggerMaker.logError;
-import static com.yachtmafia.util.LoggerMaker.logInfo;
 import static com.yachtmafia.util.Util.getCoinDoubleValue;
 
 public class BankImpl implements Bank {
 //    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
+
+    private static final Logger logger = LogManager.getLogger(Bank.class);
     private final Config config;
 
     public BankImpl(Config config) {
@@ -67,13 +69,13 @@ public class BankImpl implements Bank {
             PayoutBatch response = Payout.get(context, payoutBatchId);
             while("PENDING".equals(response.getBatchHeader().getBatchStatus())){
                 Thread.sleep(2000);
-                logInfo(this, "Waiting for pending payment...");
+                logger.info("Waiting for pending payment...");
                 response = Payout.get(context, payoutBatchId);
             }
 
             while("PROCESSING".equals(response.getBatchHeader().getBatchStatus())){
                 Thread.sleep(20000);
-                logInfo(this, "Waiting for payment to process...");
+                logger.info("Waiting for payment to process...");
                 response = Payout.get(context, payoutBatchId);
             }
 
@@ -81,14 +83,14 @@ public class BankImpl implements Bank {
             printErrors(response);
 
             if (!"SUCCESS".equals(response.getBatchHeader().getBatchStatus())){
-                logError(this, String.format("Did not successfully submit payment! currency: %s, amount: %s, user: %s",
-                        currency, amount, user));
+                logger.error("Did not successfully submit payment! currency: "
+                        + currency + " amount : " + amount + " user: " + user);
                 return false;
             }
             return true;
         } catch (Exception e) {
             // Handle errors
-            logError(this, "Error: " + payout.toJSON(), e);
+            logger.error("Error: " + payout.toJSON(), e);
             return false;
         }
     }
@@ -99,11 +101,11 @@ public class BankImpl implements Bank {
             for (PayoutItemDetails item : payoutBatchItems) {
                 Error errors = item.getErrors();
                 if (errors != null) {
-                    logError(this, "Caught errors: ");
+                    logger.error("Caught: ");
                     List<ErrorDetails> details = errors.getDetails();
                     for (ErrorDetails det : details) {
                         String issue = det.getIssue();
-                        logError(this, issue);
+                        logger.error(issue);
                     }
                 }
             }

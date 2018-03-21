@@ -10,6 +10,7 @@ import org.bitcoinj.store.BlockStoreException;
 import org.bitcoinj.wallet.Wallet;
 import org.bitcoinj.params.UnitTestParams;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.List;
@@ -36,9 +37,10 @@ public class WalletWrapperTest {
         walletWrapper.startAsync();
     }
 
-    @Test
+    @Test @Ignore
     public void sendTransaction() throws Exception {
         walletAppKit.startAsync();
+//        walletAppKit.awaitRunning();
         NetworkParameters params = walletAppKit.params();
         CryptoKeyPair btc = CryptoKeyPairGenerator.parse("BTC", params);
 
@@ -58,10 +60,12 @@ public class WalletWrapperTest {
             }
         }
 
+//        Wallet wallet = walletAppKit.wallet();
 
         Wallet wallet = new Wallet(params);
 //        wallet.set
         wallet.importKey(ECKey.fromPrivate(btc.getPrivateKey().getBytes()));
+
 
         CryptoKeyPair depositAddress = CryptoKeyPairGenerator.parse("BTC", params);
 

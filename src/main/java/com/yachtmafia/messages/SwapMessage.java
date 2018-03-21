@@ -11,7 +11,7 @@ public class SwapMessage {
     public static final String FROM_CURRENCY_NAME_ATTRIB = "FROM_CURRENCY_NAME";
     public static final String TO_CURRENCY_NAME_ATTRIB = "TO_CURRENCY_NAME";
     public static final String USERNAME_ATTRIB = "USER_NAME";
-    public static final String ID_ATTRIB = "ID";
+    public static final String ID_ATTRIB = "TRANSACTION_ID";
     private final String amountOfCoin;
     private final String fromCurrencyName;
     private final String toCurrencyName;

@@ -3,18 +3,17 @@ package com.yachtmafia.kafka;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.clients.producer.RecordMetadata;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Properties;
 import java.util.concurrent.ExecutionException;
 
-import static com.yachtmafia.util.LoggerMaker.logError;
-import static com.yachtmafia.util.LoggerMaker.logInfo;
 
 public class Producer implements Runnable{
 
 //    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
+private static final Logger logger = LogManager.getLogger(Producer.class);
 
 //    private final Logger LOG = LoggerFactory.getLogger(getClass());
     //kafka Consumer object
@@ -23,7 +22,7 @@ public class Producer implements Runnable{
     private String topic;
 
     public void configure(Properties props){
-        logInfo(this, "Configuring producer...");
+        logger.info("Configuring producer...");
         producer = new KafkaProducer<>(props);
     }
 
@@ -32,13 +31,13 @@ public class Producer implements Runnable{
     }
 
     void stop() {
-        logInfo(this, "Stopping producer...");
+        logger.info("Stopping producer...");
         running = false;
     }
 
     @Override
     public void run() {
-        logInfo(this, "Starting producer...");
+        logger.info("Starting producer...");
         try {
             while (running && !Thread.currentThread().isInterrupted()) {
                 try {
@@ -53,12 +52,12 @@ public class Producer implements Runnable{
 
                     }
                 } catch (ExecutionException e) {
-                    logError(this, "Caught error: ", e);
+                    logger.error("Caught: ", e);
                 }
             }
         }
         catch (InterruptedException ex){
-            logError(this, "Caught exception: ", ex);
+            logger.error("Caught: ", ex);
             Thread.currentThread().interrupt();
         }finally {
             producer.flush();
@@ -70,9 +69,8 @@ public class Producer implements Runnable{
         RecordMetadata metadata = producer.send(record).get();
 
         long elapsedTime = System.currentTimeMillis() - time;
-        logInfo(this, String.format("sent record(key=%s value=%s) " +
-                        "meta(partition=%d, offset=%d) time=%d\n",
-                record.key(), record.value(), metadata.partition(),
-                metadata.offset(), elapsedTime));
+        logger.info("send record(key=" + record.key() + " value="+record.value()
+                + " meta(partition=" + metadata.partition() + ", offset=" + metadata.offset()
+                + ") time=" + elapsedTime + "\n");
     }
 }

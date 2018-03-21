@@ -3,16 +3,19 @@ package com.yachtmafia.db;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.yachtmafia.config.Config;
 import com.yachtmafia.messages.SwapMessage;
+import com.yachtmafia.util.StatusLookup;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.*;
 
-import static com.yachtmafia.util.LoggerMaker.*;
 import static com.yachtmafia.util.Util.PRECISION;
 
 
 public class DBWrapperImpl implements DBWrapper {
+    private static final Logger logger = LogManager.getLogger(DBWrapper.class);
 //    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
 
     private Config config;
@@ -31,7 +34,7 @@ public class DBWrapperImpl implements DBWrapper {
     public boolean addNewWallet(String user, String coin, String publicAddress, String privateAddress) {
         String userId = getUserId(user);
         if (userId == null) {
-            logError(this, "User not found: " + user);
+            logger.error("User not found: " + user);
             return false;
         }
 
@@ -49,7 +52,7 @@ public class DBWrapperImpl implements DBWrapper {
                             + " = " + userWallet + " AND " + config.PRIVATE_KEY + " is not null";
             String userPrivatekey = getSingleQueryString(query);
             if (userPrivatekey != null) {
-                logWarning(this, "User already has wallet!");
+                logger.warn("User already has wallet! " + user);
                 return true;
             } else {
                 /**
@@ -80,12 +83,12 @@ public class DBWrapperImpl implements DBWrapper {
                     if (generatedKeys.next()) {
                         walletId = String.valueOf(generatedKeys.getLong(1));
                     } else {
-                        logError(this, "Failed to add wallet");
+                        logger.error("Failed to add wallet " + user);
                         return false;
                     }
                 }
             } catch (SQLException e) {
-                logError(this, "Caught: ", e);
+                logger.error("Caught ", e);
                 return false;
             }
 
@@ -138,7 +141,7 @@ public class DBWrapperImpl implements DBWrapper {
                 + config.ID + " = '" + message.getID() + "'";
         String id = getSingleQueryString(query);
         if (id == null) {
-            logError(this, "No transaction with ID: " + message.getID());
+            logger.error("No transactions with ID: " + message.getID());
             return false;
         }
 
@@ -158,7 +161,7 @@ public class DBWrapperImpl implements DBWrapper {
         ) {
             stmt.executeUpdate(query);
         } catch (SQLException e) {
-            logError(this, "Caught: ", e);
+            logger.error("Caught: ", e);
             return false;
         }
         return true;
@@ -194,7 +197,7 @@ public class DBWrapperImpl implements DBWrapper {
         String toFunds = getSingleQueryString(query);
 
         if (toFunds == null) {
-            logWarning(this, String.format("No to funds found for user: %s and coin: %s", user, coin));
+            logger.warn("No funds found for user: " + user + " and coin: " + coin);
             return null;
         }
 
@@ -210,7 +213,7 @@ public class DBWrapperImpl implements DBWrapper {
         String fromFunds = getSingleQueryString(query);
 
         if (fromFunds == null) {
-            logWarning(this, String.format("No from funds found for user: %s and coin: %s", user, coin));
+            logger.warn("No from funds found for user: " + user + " and coin: " + coin);
             return null;
         }
 
@@ -270,6 +273,18 @@ public class DBWrapperImpl implements DBWrapper {
         return modifyQuery(query);
     }
 
+    @Override
+    public boolean addTransactionStatus(StatusLookup statusCode, SwapMessage swapMessage) {
+        String query =
+                "INSERT INTO " +
+                        config.TRANSACTION_PROGRESS_TABLE +
+                        "    (" + config.TRANSACTION_ID + ", "
+                        + config.STATUS_ID + ") " +
+                        " VALUES " +
+                        "    ('" + swapMessage.getID() + "', '" + statusCode.getCode() + "') ";
+        return modifyQuery(query);
+    }
+
     private String getUserId(String user) {
         String query = "SELECT " + config.ID + " FROM " + config.USERS_TABLE + " WHERE "
                 + config.EMAIL + " = '" + user + "'";
@@ -301,14 +316,14 @@ public class DBWrapperImpl implements DBWrapper {
             if (rs.next()) {
                 String string = rs.getString(1);
                 if (rs.next()) {
-                    logError(this, "More than one element was found for query: " + query);
+                    logger.error("More than one element found from query: " + query);
                 }
                 return string;
             } else {
                 return null;
             }
         } catch (SQLException e) {
-            logError(this, "Caught: ", e);
+            logger.error("Caught: ", e);
         }
         return null;
     }

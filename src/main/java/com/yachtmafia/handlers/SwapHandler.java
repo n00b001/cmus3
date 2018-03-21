@@ -2,19 +2,19 @@ package com.yachtmafia.handlers;
 
 import com.yachtmafia.messages.SwapMessage;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import static com.yachtmafia.util.Const.SWAP_TOPIC_NAME;
-import static com.yachtmafia.util.LoggerMaker.logInfo;
 
 public class SwapHandler implements MessageHandler {
     private static final String TOPIC_NAME = SWAP_TOPIC_NAME;
 //    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
+private static final Logger logger = LogManager.getLogger(SwapHandler.class);
 
     private final HandlerDAO handlerDAO;
     private ConsumerRecord<String, String> message;
@@ -39,7 +39,7 @@ public class SwapHandler implements MessageHandler {
     public Boolean call() throws Exception {
         if (TOPIC_NAME.equals(message.topic())){
             SwapMessage swapMessage = new SwapMessage(message.value());
-            logInfo(this, "Swapmessage: " + swapMessage);
+            logger.info("Swapmessage: " + swapMessage);
             throw new NotImplementedException();
         }
         return false;

@@ -2,6 +2,7 @@ package com.yachtmafia.db;
 
 import com.yachtmafia.cryptoKeyPairs.BTC;
 import com.yachtmafia.messages.SwapMessage;
+import com.yachtmafia.util.StatusLookup;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.params.UnitTestParams;
 
@@ -57,6 +58,11 @@ public class DBWrapperMock implements DBWrapper {
 
     @Override
     public boolean removeTransaction(String id) {
+        return true;
+    }
+
+    @Override
+    public boolean addTransactionStatus(StatusLookup statusCode, SwapMessage swapMessage) {
         return true;
     }
 }

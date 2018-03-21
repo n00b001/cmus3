@@ -29,6 +29,7 @@ public class Config {
     public String WALLETS_TABLE = "wallets";
     public String PRIVATE_TABLE = "privatekeys";
     public String TRANSACTION_TABLE = "transactions";
+    public String TRANSACTION_PROGRESS_TABLE = "transaction_progress";
     public String JOBS_TABLE = "jobs";
 
     public String PUBLIC_ADDRESS = "public_address";
@@ -37,6 +38,8 @@ public class Config {
     public String USER_ID = "user_id";
     public String WALLET_ID = "wallet_id";
     public String ID = "id";
+    public String TRANSACTION_ID = "transaction_id";
+    public String STATUS_ID = "status_id";
 //    public String SYMBOL = "symbol";
     public String EMAIL = "email";
     public String FROM_CURRENCY_ID = "from_currency_id";
@@ -48,7 +51,8 @@ public class Config {
     public String KAFKA_MESSAGE = "kafka_message";
 
 
-    public String[] EMAIL_RECIPTS = new String[]{"xfanth@gmail.com"};
+    public String[] EMAIL_RECIPTS = new String[]{"xfanth@gmail.com", "justin.t.lai8@gmail.com",
+            "yachtmafia01@gmail.com"};
     public String EMAIL_SENDER = "yachtmafia01@gmail.com";
 //    public String EMAIL_USERNAME = "yachtmafia01@gmail.com";
     public String EMAIL_PASSWORD = "Watersports2017";
@@ -60,7 +64,8 @@ public class Config {
     public String COINBASE_SECRET = "yoSgwEVgXVRRnfeW8OZe8QybYZXDg9RJ";
     public String COINBASE_ACCESS_TOKEN_LIVE = "4a9cb0ba78434e59c5371fb388f928db72e8cd407dd2f6590f6a47a3a672cd39";
 
-    public String KAFKA_ADDRESS = "35.197.252.186:9092";
+    public String KAFKA_ADDRESS = "localhost:9092";
+//    public String KAFKA_ADDRESS = "35.197.252.186:9092";
 
 //    public String GDAX_PUBLIC_KEY_SANDBOX = "d3b4ec3c5e2801abf0c7fb35afe9e3b3";
 //    public String GDAX_PASSPHRASE_SANDBOX = "sandbox";

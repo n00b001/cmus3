@@ -12,23 +12,24 @@ import com.yachtmafia.handlers.*;
 import com.yachtmafia.kafka.Consumer;
 import com.yachtmafia.walletwrapper.WalletWrapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.kits.WalletAppKit;
 import org.bitcoinj.params.MainNetParams;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import static com.yachtmafia.util.Const.*;
-import static com.yachtmafia.util.LoggerMaker.logError;
-import static com.yachtmafia.util.LoggerMaker.logInfo;
 
 public class Main implements Thread.UncaughtExceptionHandler{
+    private static final Logger logger = LogManager.getLogger(Main.class);
 
 //    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
 
@@ -46,6 +47,11 @@ public class Main implements Thread.UncaughtExceptionHandler{
     private NetworkParameters network = MainNetParams.get();
 
     public static void main(String[] args) {
+        LoggerContext context = (org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false);
+        File file = new File("src/main/resources/log4j2.xml");
+
+// this will force a reconfiguration
+        context.setConfigLocation(file.toURI());
 
         Main Main = new Main();
         Main.run();
@@ -66,7 +72,7 @@ public class Main implements Thread.UncaughtExceptionHandler{
 
     private void setupWalletWrapper() {
         File file = new File("wallet");
-        WalletAppKit walletAppKit = new WalletAppKit(handlerDAO.getNetwork(),
+        WalletAppKit walletAppKit = new WalletAppKit(network,
                 file, "forwarding-service-main");
         walletWrapper = new WalletWrapper(walletAppKit);
     }
@@ -97,7 +103,7 @@ public class Main implements Thread.UncaughtExceptionHandler{
 
     private void startAllThreads() {
         walletWrapper.startAsync();
-        walletWrapper.getWalletAppKit().peerGroup().startAsync();
+//        walletWrapper.getWalletAppKit().peerGroup().startAsync();
         for (Thread t : threads){
             t.start();
         }
@@ -142,10 +148,10 @@ public class Main implements Thread.UncaughtExceptionHandler{
             }
         }
         catch (InterruptedException ex){
-            logError(this, "Caught error! ", ex);
+            logger.error("caught: ", ex);
             Thread.currentThread().interrupt();
         }
-        logInfo(this, "Shutting down...");
+        logger.info("Shutting down...");
         for(Thread t : threads){
             t.interrupt();
         }
@@ -155,28 +161,28 @@ public class Main implements Thread.UncaughtExceptionHandler{
         handlerDAO = new HandlerDAO(dbWrapper, bank, exchange, walletWrapper, config, network);
 
         List<MessageHandler> depositListers = new ArrayList<>();
-        ExecutorService handlerPool = Executors.newFixedThreadPool(3);
+        ExecutorService handlerPool = Executors.newFixedThreadPool(10);
         depositListers.add(new DepositHandler(handlerDAO, handlerPool));
 
         List<MessageHandler> withdrawListers = new ArrayList<>();
-        ExecutorService withdrawPool = Executors.newFixedThreadPool(3);
+        ExecutorService withdrawPool = Executors.newFixedThreadPool(10);
         withdrawListers.add(new WithdrawHandler(handlerDAO, withdrawPool));
 
         List<MessageHandler> swapListers = new ArrayList<>();
-        ExecutorService swapPool = Executors.newFixedThreadPool(3);
+        ExecutorService swapPool = Executors.newFixedThreadPool(10);
         swapListers.add(new SwapHandler(handlerDAO, swapPool));
 
 
-        Consumer depositConsumer = configureConsumer(Arrays.asList(DEPOSIT_TOPIC_NAME), depositListers);
-        Consumer withdrawConsumer = configureConsumer(Arrays.asList(WITHDRAW_TOPIC_NAME), withdrawListers);
-        Consumer swapConsumer = configureConsumer(Arrays.asList(SWAP_TOPIC_NAME), swapListers);
+        Consumer depositConsumer = configureConsumer(DEPOSIT_TOPIC_NAME, depositListers);
+        Consumer withdrawConsumer = configureConsumer(WITHDRAW_TOPIC_NAME, withdrawListers);
+        Consumer swapConsumer = configureConsumer(SWAP_TOPIC_NAME, swapListers);
 
         threads.add(new Thread(depositConsumer));
         threads.add(new Thread(withdrawConsumer));
         threads.add(new Thread(swapConsumer));
     }
 
-    private Consumer configureConsumer(List<String> topics, List<MessageHandler> listeners) {
+    private Consumer configureConsumer(String topics, List<MessageHandler> listeners) {
         //consumer properties
         Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, config.KAFKA_ADDRESS);
@@ -199,6 +205,6 @@ public class Main implements Thread.UncaughtExceptionHandler{
 
     @Override
     public void uncaughtException(Thread t, Throwable e) {
-        logError(this, String.format("Caught from thread: %s: ", t.toString()), e);
+        logger.fatal("Caught: " + t.toString(), e);
     }
 }

@@ -3,6 +3,7 @@ package com.yachtmafia.db;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.annotations.VisibleForTesting;
 import com.yachtmafia.messages.SwapMessage;
+import com.yachtmafia.util.StatusLookup;
 
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -23,4 +24,6 @@ public interface DBWrapper {
 
     @VisibleForTesting
     boolean removeTransaction(String id);
+
+    boolean addTransactionStatus(StatusLookup statusCode, SwapMessage swapMessage);
 }

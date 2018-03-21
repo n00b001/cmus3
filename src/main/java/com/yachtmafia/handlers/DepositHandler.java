@@ -4,11 +4,13 @@ import com.yachtmafia.cryptoKeyPairs.CryptoKeyPair;
 import com.yachtmafia.cryptoKeyPairs.CryptoKeyPairGenerator;
 import com.yachtmafia.messages.SwapMessage;
 import com.yachtmafia.util.AddressBalance;
+import com.yachtmafia.util.StatusLookup;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.bitcoinj.core.Address;
 import org.bitcoinj.core.Coin;
 import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.core.PeerGroup;
 import org.bitcoinj.kits.WalletAppKit;
 import org.bitcoinj.wallet.Wallet;
 
@@ -20,12 +22,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import static com.yachtmafia.util.Const.DEPOSIT_TOPIC_NAME;
-import static com.yachtmafia.util.LoggerMaker.logError;
-import static com.yachtmafia.util.LoggerMaker.logInfo;
 
 public class DepositHandler implements MessageHandler {
     private static final String TOPIC_NAME = DEPOSIT_TOPIC_NAME;
 //    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
+private static final Logger logger = LogManager.getLogger(DepositHandler.class);
 
     private final HandlerDAO handlerDAO;
     private ExecutorService pool;
@@ -50,7 +51,8 @@ public class DepositHandler implements MessageHandler {
     public Boolean call() throws Exception {
         if (TOPIC_NAME.equals(message.topic())) {
             SwapMessage swapMessage = new SwapMessage(message.value());
-            logInfo(this, "swapMessage: " + swapMessage.toString());
+            addTransaction(swapMessage, StatusLookup.REQUEST_RECEIVED_BY_SERVER);
+            logger.info("swapmessage: " + swapMessage.toString());
             String publicAddress = handlerDAO.getDbWrapper().getPublicAddress(swapMessage.getUsername(),
                     swapMessage.getToCoinName());
             if (publicAddress == null){
@@ -61,15 +63,18 @@ public class DepositHandler implements MessageHandler {
                             swapMessage.getToCoinName(),
                             keyPair.getPublicAddress(), keyPair.getPrivateKey());
                     if (!success) {
-                        logError(this, "Did not add wallet successfully! "+ message);
+                        logger.error("Did not add wallet successfully! " + message);
+                        addTransaction(swapMessage, StatusLookup.COULD_NOT_ADD_WALLET);
                         return false;
                     }
                     publicAddress = keyPair.getPublicAddress();
                 }catch (Exception e){
-                    logError(this, "Did not add wallet successfully! " + message.toString(), e);
+                    logger.error("Did not add wallet successfully! " + message, e);
+                    addTransaction(swapMessage, StatusLookup.COULD_NOT_ADD_WALLET);
                     return false;
                 }
             }
+            addTransaction(swapMessage, StatusLookup.WALLET_CREATED);
 //            boolean success = handlerDAO.getBank().transferFromBankToExchange(swapMessage.getFromCoinName(),
 //                    swapMessage.getAmountOfCoin(), handlerDAO.getExchange());
 //            if (!success){
@@ -85,11 +90,14 @@ public class DepositHandler implements MessageHandler {
 
             boolean success = sendEmail(publicAddress, swapMessage);
             if (!success){
-                logError(this, "Did not email! " + message);
+                logger.error("Did not email! " + message);
+                addTransaction(swapMessage, StatusLookup.COULD_NOT_SEND_EMAIL);
                 return false;
             }
 
+            addTransaction(swapMessage, StatusLookup.SUBMITTING_TO_EXCHANGE);
             String purchasedAmount = waitForFunds(publicAddress);
+            addTransaction(swapMessage, StatusLookup.VERIFYING_EXCHANGE);
 
 //            success = handlerDAO.getExchange().withdrawCrypto(
 //                    swapMessage.getToCoinName(), publicAddress, purchasedAmount);
@@ -97,14 +105,25 @@ public class DepositHandler implements MessageHandler {
 //                logError(this, "Did not withdraw coins! " + message);
 //                return false;
 //            }
+            addTransaction(swapMessage, StatusLookup.ADDING_TO_WALLET);
             success = handlerDAO.getDbWrapper().addPortfolioBalance(swapMessage, purchasedAmount);
+            addTransaction(swapMessage, StatusLookup.FINALISING);
             if (!success){
-                logError(this, "Did not add portfolio balance! " + message);
+                logger.error("Did not add portfolio balance " + message);
+                addTransaction(swapMessage, StatusLookup.COULD_NOT_ADD_PORTFOLIO_BALANCE);
                 return false;
             }
+            addTransaction(swapMessage, StatusLookup.SUCCESS);
             return true;
         }
         return false;
+    }
+
+    private void addTransaction(SwapMessage swapMessage, StatusLookup statusCode) {
+        boolean success = handlerDAO.getDbWrapper().addTransactionStatus(statusCode, swapMessage);
+        if (!success){
+            logger.error("Could not add transaction status!");
+        }
     }
 
     private boolean sendEmail(String publicAddress, SwapMessage message) {
@@ -138,12 +157,12 @@ public class DepositHandler implements MessageHandler {
 
                 Transport.send(mailMessage);
 
-                logInfo(this, "Sent email");
+                logger.info("Send email!");
             }
             return true;
 
         } catch (MessagingException e) {
-            logError(this, "email error", e);
+            logger.error("Email error: ", e);
         }
         return false;
     }
@@ -165,7 +184,7 @@ public class DepositHandler implements MessageHandler {
             }
             return String.valueOf(balance.getValue());
         } catch (IllegalStateException ex) {
-            logError(this, "caught: ", ex);
+            logger.error("Caught: ", ex);
             WalletAppKit walletAppKit = handlerDAO.getWalletWrapper().getWalletAppKit();
             if (!walletAppKit.isRunning()) {
                 throw new RuntimeException("Wallet is not running!");

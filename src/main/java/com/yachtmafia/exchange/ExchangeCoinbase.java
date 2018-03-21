@@ -6,6 +6,8 @@ import com.coinbase.api.entity.Transfer;
 import com.coinbase.api.exception.CoinbaseException;
 import com.yachtmafia.config.Config;
 //import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.joda.money.CurrencyUnit;
 import org.joda.money.Money;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -14,10 +16,6 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import static com.yachtmafia.util.LoggerMaker.logError;
-import static com.yachtmafia.util.LoggerMaker.logInfo;
-import static com.yachtmafia.util.LoggerMaker.logWarning;
-
 /**
  * Created by xfant on 2018-01-20.
  */
@@ -25,6 +23,7 @@ public class ExchangeCoinbase implements Exchange {
     private final Coinbase cb;
     private final Config config;
 //    private final Logger LOG = Logger.getLogger(getClass().getSimpleName());
+    private static final Logger logger = LogManager.getLogger(Exchange.class);
 
 
     public ExchangeCoinbase(Config config) {
@@ -56,7 +55,8 @@ public class ExchangeCoinbase implements Exchange {
 
 //            }
         }catch (IOException|CoinbaseException|InterruptedException e){
-            logWarning(this, "Caught exception: ", e);
+            logger.warn("Caught: ", e);
+
         }
 //        throw new NotImplementedException();
         return null;
@@ -65,19 +65,19 @@ public class ExchangeCoinbase implements Exchange {
     private void handleStatus(Transfer buy) throws InterruptedException {
         Transfer.Status status = buy.getStatus();
         while(status.equals(Transfer.Status.CREATED)){
-            logInfo(this, "Transaction created...");
+            logger.info("Transaction created...");
             Thread.sleep(1000);
             status = buy.getStatus();
         }
         while(status.equals(Transfer.Status.PENDING)){
-            logInfo(this, "Transaction pending...");
+            logger.info("Transaction pending...");
             Thread.sleep(1000);
             status = buy.getStatus();
         }
         if(Transfer.Status.COMPLETE.equals(status)){
-            logInfo(this, "Success!");
+            logger.info("Success!");
         }else{
-            logError(this, "Failure!" + status.toString());
+            logger.error("Failure!");
         }
     }
 
@@ -103,7 +103,7 @@ public class ExchangeCoinbase implements Exchange {
             cb.getSupportedCurrencies().forEach(
                     a -> returnSet.add(a.getSymbol()));
         } catch (CoinbaseException| IOException e) {
-            logError(this, "Caught: " + e);
+            logger.error("Caught: ", e);
         }
         return returnSet;
     }
@@ -111,16 +111,16 @@ public class ExchangeCoinbase implements Exchange {
     @Override
     public String getLowestPrice(String symbolPair) {
         if (symbolPair == null){
-            logError(this, "symbolPair == null ");
+            logger.error("Symbol pair == null");
         }else if (!symbolPair.contains("BTC")){
-            logError(this, "Currency not supported: " + symbolPair);
+            logger.error("Currency not supported: " + symbolPair);
         }else{
             try {
                 String currency = symbolPair.replace("BTC", "");
                 Money spotPrice = cb.getSpotPrice(CurrencyUnit.getInstance(currency));
                 return spotPrice.getAmount().toPlainString();
             }catch (IOException| CoinbaseException ex){
-                logError(this, "Caught error: ", ex);
+                logger.error("Caught: ", ex);
             }
         }
         return null;
@@ -163,16 +163,17 @@ public class ExchangeCoinbase implements Exchange {
     @Override
     public String getHighestPrice(String symbolPair) {
         if (symbolPair == null){
-            logError(this, "symbolPair == null ");
+            logger.error("Symbol pair == null");
+
         }else if (!symbolPair.contains("BTC")){
-            logError(this, "Currency not supported: " + symbolPair);
+            logger.error("Currency not supported: " + symbolPair);
         }else{
             try {
                 String currency = symbolPair.replace("BTC", "");
                 Money spotPrice = cb.getSpotPrice(CurrencyUnit.getInstance(currency));
                 return spotPrice.getAmount().toPlainString();
             }catch (IOException| CoinbaseException ex){
-                logError(this, "Caught error: ", ex);
+                logger.error("Caught: ", ex);
             }
         }
         return null;

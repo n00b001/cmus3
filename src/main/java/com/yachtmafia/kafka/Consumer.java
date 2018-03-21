@@ -4,22 +4,23 @@ import com.yachtmafia.handlers.MessageHandler;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
-//import org.apache.log4j.Logger;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Future;
+import java.util.Arrays;
 
-import static com.yachtmafia.util.LoggerMaker.logError;
-import static com.yachtmafia.util.LoggerMaker.logInfo;
+//import org.apache.log4j.Logger;
 
 public class Consumer implements Runnable{
 
 //    private final Logger LOG = LoggerFactory.getLogger(getClass());
+
+    private static final Logger logger = LogManager.getLogger(Consumer.class);
     private Set<Future<Boolean>> set = new HashSet<>();
     //kafka Consumer object
     private KafkaConsumer<String, String> consumer;
@@ -27,26 +28,27 @@ public class Consumer implements Runnable{
     private List<MessageHandler> listeners;
 
     public Consumer(Properties props, List<MessageHandler> listeners){
-        logInfo(this, "Configuring Consumer...");
+        logger.info("Configuring consumer...");
         this.listeners = listeners;
         consumer = new KafkaConsumer<>(props);
     }
 
-    public void subscribe(List<String> topics){
+    public void subscribe(String topics){
         //subscribe to topic
 
-        logInfo(this, String.format("Subscribing to: %s", topics.toString()));
-        consumer.subscribe(topics);
+        logger.info("Subscribing to: " + topics);
+        consumer.subscribe(Arrays.asList(topics));
     }
 
     public void stop(){
-        logInfo(this, "Stopping Consumer...");
+        logger.info("Stopping Consumer...");
+
         running = false;
     }
 
     @Override
     public void run() {
-        logInfo(this, "Starting Consumer...");
+        logger.info("Starting consumer...");
         while (running && !Thread.currentThread().isInterrupted()) {
             try {
                 ConsumerRecords<String, String> records = consumer.poll(1000);
@@ -65,7 +67,7 @@ public class Consumer implements Runnable{
                 running = false;
                 Thread.currentThread().interrupt();
             }catch (Exception e) {
-                logError(this, "Caught exception: ", e);
+                logger.error("Caught: ", e);
             }
         }
 
@@ -77,7 +79,7 @@ public class Consumer implements Runnable{
             Future<Boolean> future = handler.run(record);
             set.add(future);
         } catch (Exception e) {
-            logError(this, "Caught exception: ", e);
+            logger.error("Caught: ", e);
             consumer.commitAsync();
         }
     }
@@ -88,9 +90,9 @@ public class Consumer implements Runnable{
              * Do nothing
              */
         } else if (!success) {
-            logError(this, "Could not process: ");
+            logger.error("Could not process: ");
             for (ConsumerRecord<String, String> msg : records) {
-                logError(this, msg.value());
+                logger.error(msg.value());
             }
         } else {
             consumer.commitSync();
