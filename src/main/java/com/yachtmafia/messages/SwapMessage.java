@@ -50,10 +50,11 @@ public class SwapMessage {
     @Override
     public String toString() {
         return "SwapMessage{" +
-                "amountOfCoin=" + amountOfCoin +
+                "amountOfCoin='" + amountOfCoin + '\'' +
                 ", fromCurrencyName='" + fromCurrencyName + '\'' +
                 ", toCurrencyName='" + toCurrencyName + '\'' +
                 ", username='" + username + '\'' +
+                ", id='" + id + '\'' +
                 '}';
     }
 

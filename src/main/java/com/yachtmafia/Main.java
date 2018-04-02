@@ -18,6 +18,8 @@ import org.apache.logging.log4j.core.LoggerContext;
 import org.bitcoinj.core.NetworkParameters;
 import org.bitcoinj.kits.WalletAppKit;
 import org.bitcoinj.params.MainNetParams;
+import org.web3j.protocol.Web3j;
+import org.web3j.protocol.http.HttpService;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -44,7 +46,7 @@ public class Main implements Thread.UncaughtExceptionHandler{
     private HandlerDAO handlerDAO;
     private Config config;
     private WalletWrapper walletWrapper;
-    private NetworkParameters network = MainNetParams.get();
+    private NetworkParameters network;
 
     public static void main(String[] args) {
         LoggerContext context = (org.apache.logging.log4j.core.LoggerContext) LogManager.getContext(false);
@@ -59,6 +61,7 @@ public class Main implements Thread.UncaughtExceptionHandler{
 
     private void run(){
         setupConfig();
+        setupNetwork();
         setupDBWrapper();
         setupBank();
         setupExchange();
@@ -70,11 +73,17 @@ public class Main implements Thread.UncaughtExceptionHandler{
         waitForThreadsToFinish();
     }
 
+    private void setupNetwork() {
+        network = NetworkParameters.fromID(config.NETWORK);
+    }
+
     private void setupWalletWrapper() {
         File file = new File("wallet");
         WalletAppKit walletAppKit = new WalletAppKit(network,
                 file, "forwarding-service-main");
-        walletWrapper = new WalletWrapper(walletAppKit);
+
+        Web3j web3j = Web3j.build(new HttpService());  // defaults to http://localhost:8545/
+        walletWrapper = new WalletWrapper(walletAppKit, web3j);
     }
 
     private void setupConfig() {
@@ -103,7 +112,7 @@ public class Main implements Thread.UncaughtExceptionHandler{
 
     private void startAllThreads() {
         walletWrapper.startAsync();
-//        walletWrapper.getWalletAppKit().peerGroup().startAsync();
+//        walletWrapper.getBitcoinWalletAppKit().peerGroup().startAsync();
         for (Thread t : threads){
             t.start();
         }
@@ -158,18 +167,19 @@ public class Main implements Thread.UncaughtExceptionHandler{
     }
 
     private void setupConsumers() {
-        handlerDAO = new HandlerDAO(dbWrapper, bank, exchange, walletWrapper, config, network);
+        handlerDAO = new HandlerDAO(dbWrapper, bank, exchange, walletWrapper,
+                config, network);
 
         List<MessageHandler> depositListers = new ArrayList<>();
-        ExecutorService handlerPool = Executors.newFixedThreadPool(10);
+        ExecutorService handlerPool = Executors.newFixedThreadPool(config.AMOUNT_OF_HANDLER_THREADS);
         depositListers.add(new DepositHandler(handlerDAO, handlerPool));
 
         List<MessageHandler> withdrawListers = new ArrayList<>();
-        ExecutorService withdrawPool = Executors.newFixedThreadPool(10);
+        ExecutorService withdrawPool = Executors.newFixedThreadPool(config.AMOUNT_OF_HANDLER_THREADS);
         withdrawListers.add(new WithdrawHandler(handlerDAO, withdrawPool));
 
         List<MessageHandler> swapListers = new ArrayList<>();
-        ExecutorService swapPool = Executors.newFixedThreadPool(10);
+        ExecutorService swapPool = Executors.newFixedThreadPool(config.AMOUNT_OF_HANDLER_THREADS);
         swapListers.add(new SwapHandler(handlerDAO, swapPool));
 
 

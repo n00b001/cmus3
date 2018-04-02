@@ -33,7 +33,7 @@ public class DepositHandlerTest {
 
         handlerDAO = new HandlerDAO(
                 new DBWrapperMock(MainNetParams.get()), new BankMock(),
-                new ExchangeMock(), new WalletWrapper(walletAppKit),
+                new ExchangeMock(), new WalletWrapper(walletAppKit, web3j),
                 new Config(), walletAppKit.params());
 
         ExecutorService handlerPool = Executors.newFixedThreadPool(3);

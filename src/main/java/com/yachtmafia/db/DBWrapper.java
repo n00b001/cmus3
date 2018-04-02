@@ -25,5 +25,5 @@ public interface DBWrapper {
     @VisibleForTesting
     boolean removeTransaction(String id);
 
-    boolean addTransactionStatus(StatusLookup statusCode, SwapMessage swapMessage);
+    boolean addTransactionStatus(SwapMessage statusCode, StatusLookup swapMessage);
 }

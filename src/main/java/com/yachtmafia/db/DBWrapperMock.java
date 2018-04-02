@@ -4,7 +4,6 @@ import com.yachtmafia.cryptoKeyPairs.BTC;
 import com.yachtmafia.messages.SwapMessage;
 import com.yachtmafia.util.StatusLookup;
 import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.params.UnitTestParams;
 
 import java.math.BigDecimal;
 
@@ -62,7 +61,7 @@ public class DBWrapperMock implements DBWrapper {
     }
 
     @Override
-    public boolean addTransactionStatus(StatusLookup statusCode, SwapMessage swapMessage) {
+    public boolean addTransactionStatus(SwapMessage statusCode, StatusLookup swapMessage) {
         return true;
     }
 }

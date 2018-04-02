@@ -6,6 +6,7 @@ import com.yachtmafia.db.DBWrapper;
 import com.yachtmafia.exchange.Exchange;
 import com.yachtmafia.walletwrapper.WalletWrapper;
 import org.bitcoinj.core.NetworkParameters;
+import org.web3j.protocol.Web3j;
 
 /**
  * Created by xfant on 2017-12-31.

@@ -21,7 +21,7 @@ public class Consumer implements Runnable{
 //    private final Logger LOG = LoggerFactory.getLogger(getClass());
 
     private static final Logger logger = LogManager.getLogger(Consumer.class);
-    private Set<Future<Boolean>> set = new HashSet<>();
+    private Set<Future<Boolean>> threadsOfFutures = new HashSet<>();
     //kafka Consumer object
     private KafkaConsumer<String, String> consumer;
     private volatile boolean running = true;
@@ -51,7 +51,7 @@ public class Consumer implements Runnable{
         logger.info("Starting consumer...");
         while (running && !Thread.currentThread().isInterrupted()) {
             try {
-                ConsumerRecords<String, String> records = consumer.poll(1000);
+                ConsumerRecords<String, String> records = consumer.poll(250);
                 for (ConsumerRecord<String, String> record : records) {
                     for (MessageHandler handler : listeners) {
                         callListener(record, handler);
@@ -59,13 +59,16 @@ public class Consumer implements Runnable{
 //                logInfo(getClass(), String.format("offset = %d, key = %s, value = %s\n", record.offset(), record.key(), record.value()));
 //                System.out.printf("offset = %d, key = %s, value = %s\n", record.offset(), record.key(), record.value());
                 }
-                Boolean success = getSuccess();
-                set.clear();
-                commitOnSuccess(records, success);
-            } catch (InterruptedException e) {
-//                logError(getClass(), "Caught exception: ", e);
-                running = false;
-                Thread.currentThread().interrupt();
+                /**
+                 * todo: Commit only on success, BUT don't block other people's payments
+                 */
+//                Boolean success = getSuccess();
+//                commitOnSuccess(records, success);
+                threadsOfFutures.clear();
+//            } catch (InterruptedException e) {
+////                logError(getClass(), "Caught exception: ", e);
+//                running = false;
+//                Thread.currentThread().interrupt();
             }catch (Exception e) {
                 logger.error("Caught: ", e);
             }
@@ -77,7 +80,7 @@ public class Consumer implements Runnable{
         try {
 //                        boolean successfullyProcessed = handler.processMessage(record);
             Future<Boolean> future = handler.run(record);
-            set.add(future);
+            threadsOfFutures.add(future);
         } catch (Exception e) {
             logger.error("Caught: ", e);
             consumer.commitAsync();
@@ -102,7 +105,7 @@ public class Consumer implements Runnable{
 
     private Boolean getSuccess() throws InterruptedException, java.util.concurrent.ExecutionException {
         Boolean success = null;
-        for (Future<Boolean> fut : set) {
+        for (Future<Boolean> fut : threadsOfFutures) {
             success = (success == null ? true : success) && fut.get();
         }
         return success;

@@ -7,8 +7,8 @@ import org.bitcoinj.core.*;
 import org.bitcoinj.kits.WalletAppKit;
 import org.bitcoinj.wallet.SendRequest;
 import org.bitcoinj.wallet.Wallet;
+import org.web3j.protocol.Web3j;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,22 +20,29 @@ public class WalletWrapper {
 
     private static final Logger logger = LogManager.getLogger(WalletWrapper.class);
 //    private File file = new File("wallet/.");
-    private WalletAppKit walletAppKit;// = new WalletAppKit(MainNetParams.get(), file, "");
+    private final WalletAppKit bitcoinWalletAppKit;// = new WalletAppKit(MainNetParams.get(), file, "");
+    private final Web3j ethereumWallet;
 
-    public WalletWrapper(WalletAppKit walletAppKit) {
-        this.walletAppKit = walletAppKit;
+    public WalletWrapper(WalletAppKit bitcoinWalletAppKit, Web3j ethereumWallet) {
+        this.bitcoinWalletAppKit = bitcoinWalletAppKit;
+        this.ethereumWallet = ethereumWallet;
     }
 
     public void startAsync() {
-        walletAppKit.startAsync();
+        bitcoinWalletAppKit.startAsync();
     }
 
-    public WalletAppKit getWalletAppKit() {
-        return walletAppKit;
+    public WalletAppKit getBitcoinWalletAppKit() {
+        return bitcoinWalletAppKit;
     }
 
-    public boolean sendTransaction(String privateKey, String publicAddress, String depositAddress, String amountOfCoin,
-                                   NetworkParameters network) {
+    public Web3j getEthereumWallet() {
+        return ethereumWallet;
+    }
+
+    public boolean sendBitcoinTransaction(String privateKey, String publicAddress,
+                                          String depositAddress, String amountOfCoin,
+                                          NetworkParameters network) {
         try {
             /**
              * todo: test
@@ -56,7 +63,7 @@ public class WalletWrapper {
 // Ensure these funds won't be spent again.
             wallet.commitTx(request.tx);
 // A proposed transaction is now sitting in request.tx - send it in the background.
-            ListenableFuture<Transaction> future = walletAppKit.peerGroup()
+            ListenableFuture<Transaction> future = bitcoinWalletAppKit.peerGroup()
                     .broadcastTransaction(request.tx).future();
 
 // The future will complete when we've seen the transaction ripple across the network to a sufficient degree.
@@ -71,7 +78,4 @@ public class WalletWrapper {
         }
     }
 
-    public Wallet getWallet(){
-        return walletAppKit.wallet();
-    }
 }

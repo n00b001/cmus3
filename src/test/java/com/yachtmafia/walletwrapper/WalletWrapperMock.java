@@ -2,7 +2,6 @@ package com.yachtmafia.walletwrapper;
 
 import com.yachtmafia.WalletAppKitMock;
 import org.bitcoinj.core.NetworkParameters;
-import org.bitcoinj.kits.WalletAppKit;
 import org.bitcoinj.store.BlockStoreException;
 
 /**
@@ -11,7 +10,7 @@ import org.bitcoinj.store.BlockStoreException;
 public class WalletWrapperMock extends WalletWrapper {
 
     public WalletWrapperMock() throws BlockStoreException {
-        super(new WalletAppKitMock());
+        super(new WalletAppKitMock(), new Web3jMock(new Web3jServiceMock(true)));
     }
 
     @Override
@@ -22,7 +21,7 @@ public class WalletWrapperMock extends WalletWrapper {
     }
 
     @Override
-    public boolean sendTransaction(String privateKey, String publicAddress, String depositAddress, String amountOfCoin, NetworkParameters network) {
+    public boolean sendBitcoinTransaction(String privateKey, String publicAddress, String depositAddress, String amountOfCoin, NetworkParameters network) {
         return true;
     }
 }

@@ -274,7 +274,7 @@ public class DBWrapperImpl implements DBWrapper {
     }
 
     @Override
-    public boolean addTransactionStatus(StatusLookup statusCode, SwapMessage swapMessage) {
+    public boolean addTransactionStatus(SwapMessage swapMessage, StatusLookup statusCode) {
         String query =
                 "INSERT INTO " +
                         config.TRANSACTION_PROGRESS_TABLE +

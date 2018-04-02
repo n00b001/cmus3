@@ -51,7 +51,7 @@ private static final Logger logger = LogManager.getLogger(DepositHandler.class);
     public Boolean call() throws Exception {
         if (TOPIC_NAME.equals(message.topic())) {
             SwapMessage swapMessage = new SwapMessage(message.value());
-            addTransaction(swapMessage, StatusLookup.REQUEST_RECEIVED_BY_SERVER);
+            handlerDAO.getDbWrapper().addTransactionStatus(swapMessage, StatusLookup.REQUEST_RECEIVED_BY_SERVER);
             logger.info("swapmessage: " + swapMessage.toString());
             String publicAddress = handlerDAO.getDbWrapper().getPublicAddress(swapMessage.getUsername(),
                     swapMessage.getToCoinName());
@@ -64,17 +64,17 @@ private static final Logger logger = LogManager.getLogger(DepositHandler.class);
                             keyPair.getPublicAddress(), keyPair.getPrivateKey());
                     if (!success) {
                         logger.error("Did not add wallet successfully! " + message);
-                        addTransaction(swapMessage, StatusLookup.COULD_NOT_ADD_WALLET);
+                        handlerDAO.getDbWrapper().addTransactionStatus(swapMessage, StatusLookup.COULD_NOT_ADD_WALLET);
                         return false;
                     }
                     publicAddress = keyPair.getPublicAddress();
                 }catch (Exception e){
                     logger.error("Did not add wallet successfully! " + message, e);
-                    addTransaction(swapMessage, StatusLookup.COULD_NOT_ADD_WALLET);
+                    handlerDAO.getDbWrapper().addTransactionStatus(swapMessage, StatusLookup.COULD_NOT_ADD_WALLET);
                     return false;
                 }
             }
-            addTransaction(swapMessage, StatusLookup.WALLET_CREATED);
+            handlerDAO.getDbWrapper().addTransactionStatus(swapMessage, StatusLookup.WALLET_CREATED);
 //            boolean success = handlerDAO.getBank().transferFromBankToExchange(swapMessage.getFromCoinName(),
 //                    swapMessage.getAmountOfCoin(), handlerDAO.getExchange());
 //            if (!success){
@@ -91,13 +91,13 @@ private static final Logger logger = LogManager.getLogger(DepositHandler.class);
             boolean success = sendEmail(publicAddress, swapMessage);
             if (!success){
                 logger.error("Did not email! " + message);
-                addTransaction(swapMessage, StatusLookup.COULD_NOT_SEND_EMAIL);
+                handlerDAO.getDbWrapper().addTransactionStatus(swapMessage, StatusLookup.COULD_NOT_SEND_EMAIL);
                 return false;
             }
 
-            addTransaction(swapMessage, StatusLookup.SUBMITTING_TO_EXCHANGE);
+            handlerDAO.getDbWrapper().addTransactionStatus(swapMessage, StatusLookup.SUBMITTING_TO_EXCHANGE);
             String purchasedAmount = waitForFunds(publicAddress);
-            addTransaction(swapMessage, StatusLookup.VERIFYING_EXCHANGE);
+            handlerDAO.getDbWrapper().addTransactionStatus(swapMessage, StatusLookup.VERIFYING_EXCHANGE);
 
 //            success = handlerDAO.getExchange().withdrawCrypto(
 //                    swapMessage.getToCoinName(), publicAddress, purchasedAmount);
@@ -105,25 +105,18 @@ private static final Logger logger = LogManager.getLogger(DepositHandler.class);
 //                logError(this, "Did not withdraw coins! " + message);
 //                return false;
 //            }
-            addTransaction(swapMessage, StatusLookup.ADDING_TO_WALLET);
+            handlerDAO.getDbWrapper().addTransactionStatus(swapMessage, StatusLookup.ADDING_TO_WALLET);
             success = handlerDAO.getDbWrapper().addPortfolioBalance(swapMessage, purchasedAmount);
-            addTransaction(swapMessage, StatusLookup.FINALISING);
+            handlerDAO.getDbWrapper().addTransactionStatus(swapMessage, StatusLookup.FINALISING);
             if (!success){
                 logger.error("Did not add portfolio balance " + message);
-                addTransaction(swapMessage, StatusLookup.COULD_NOT_ADD_PORTFOLIO_BALANCE);
+                handlerDAO.getDbWrapper().addTransactionStatus(swapMessage, StatusLookup.COULD_NOT_ADD_PORTFOLIO_BALANCE);
                 return false;
             }
-            addTransaction(swapMessage, StatusLookup.SUCCESS);
+            handlerDAO.getDbWrapper().addTransactionStatus(swapMessage, StatusLookup.SUCCESS);
             return true;
         }
         return false;
-    }
-
-    private void addTransaction(SwapMessage swapMessage, StatusLookup statusCode) {
-        boolean success = handlerDAO.getDbWrapper().addTransactionStatus(statusCode, swapMessage);
-        if (!success){
-            logger.error("Could not add transaction status!");
-        }
     }
 
     private boolean sendEmail(String publicAddress, SwapMessage message) {
@@ -151,13 +144,16 @@ private static final Logger logger = LogManager.getLogger(DepositHandler.class);
                 mailMessage.setFrom(new InternetAddress(handlerDAO.getConfig().EMAIL_SENDER));
                 mailMessage.setRecipients(Message.RecipientType.TO,
                         InternetAddress.parse(recipient));
-                mailMessage.setSubject("User Has made purchase");
-                mailMessage.setText("Address:\n\n " + publicAddress
-                        + "\n\n message: \n\n" + message.toString());
+                mailMessage.setSubject("User Has made purchase: " + message.getID());
+                mailMessage.setText("Address: " + publicAddress
+                        + "\n\nCoin from: " + message.getFromCoinName()
+                        + "\nAmount: " + message.getAmountOfCoin()
+                        + "\n\nCoin to: " + message.getToCoinName() + "\n"
+                        + "\n\n\nFull message: \n" + message.toString());
 
                 Transport.send(mailMessage);
 
-                logger.info("Send email!");
+                logger.info("Sent email to: " + recipient + "!");
             }
             return true;
 
@@ -173,19 +169,21 @@ private static final Logger logger = LogManager.getLogger(DepositHandler.class);
         AddressBalance addressBalance = new AddressBalance(address);
 
         try {
-            Wallet wallet = handlerDAO.getWalletWrapper().getWallet();
+            Wallet wallet = handlerDAO.getWalletWrapper().getBitcoinWalletAppKit().wallet();
             Coin balance = wallet.getBalance(addressBalance);
 
 //        Wallet wallet = Wallet.fromWatchingKeyB58(MainNetParams.get(), publicAddress, 0);
 //        Coin balance = wallet.getBalance();
+            logger.info("Waiting for exchange...");
             while (balance.isZero()) {
                 Thread.sleep(1000);
                 balance = wallet.getBalance();
             }
+            logger.info("Exchange done for value: " + balance.getValue());
             return String.valueOf(balance.getValue());
         } catch (IllegalStateException ex) {
             logger.error("Caught: ", ex);
-            WalletAppKit walletAppKit = handlerDAO.getWalletWrapper().getWalletAppKit();
+            WalletAppKit walletAppKit = handlerDAO.getWalletWrapper().getBitcoinWalletAppKit();
             if (!walletAppKit.isRunning()) {
                 throw new RuntimeException("Wallet is not running!");
             }

@@ -5,10 +5,8 @@ import com.yachtmafia.cryptoKeyPairs.CryptoKeyPair;
 import com.yachtmafia.cryptoKeyPairs.CryptoKeyPairGenerator;
 import org.bitcoinj.core.*;
 import org.bitcoinj.kits.WalletAppKit;
-import org.bitcoinj.params.RegTestParams;
 import org.bitcoinj.store.BlockStoreException;
 import org.bitcoinj.wallet.Wallet;
-import org.bitcoinj.params.UnitTestParams;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -29,7 +27,7 @@ public class WalletWrapperTest {
 
     @Before
     public void setUp() throws Exception {
-        walletWrapper = new WalletWrapper(walletAppKit);
+        walletWrapper = new WalletWrapper(walletAppKit, web3j);
     }
 
     @Test
@@ -72,7 +70,7 @@ public class WalletWrapperTest {
         String privateKey = btc.getPrivateKey();
         String despositAddress = depositAddress.getPublicAddress();
         String amountOfCoin = getUnitsPerCoin("BTC").toPlainString();
-        boolean success = walletWrapper.sendTransaction(privateKey, publicAddress,
+        boolean success = walletWrapper.sendBitcoinTransaction(privateKey, publicAddress,
                 despositAddress, amountOfCoin, params);
         assert success;
     }

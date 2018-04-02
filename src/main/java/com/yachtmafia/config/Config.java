@@ -23,6 +23,8 @@ public class Config {
 //    public String username = "root";
     public String password = "46492c38";
 //    public String password = "Watersports2017";
+    public int AMOUNT_OF_HANDLER_THREADS = 30;
+    public String NETWORK = "org.bitcoin.production";
 
     public String CURRENCIES_TABLE = "currencies";
     public String USERS_TABLE = "users";
@@ -51,7 +53,8 @@ public class Config {
     public String KAFKA_MESSAGE = "kafka_message";
 
 
-    public String[] EMAIL_RECIPTS = new String[]{"xfanth@gmail.com", "justin.t.lai8@gmail.com",
+    public String[] EMAIL_RECIPTS = new String[]{
+            "purchases@yachtmafia.mailclark.ai",
             "yachtmafia01@gmail.com"};
     public String EMAIL_SENDER = "yachtmafia01@gmail.com";
 //    public String EMAIL_USERNAME = "yachtmafia01@gmail.com";
